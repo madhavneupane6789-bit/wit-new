@@ -1,0 +1,122 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum FileType {
+  VIDEO
+  PDF
+}
+
+model User {
+  id             String   @id @default(uuid())
+  name           String
+  email          String   @unique
+  passwordHash   String
+  role           Role     @default(USER)
+  isApproved     Boolean  @default(false)
+  isActive       Boolean  @default(true)
+  phone          String?
+  school         String?
+  preparingFor   String?
+  avatarUrl      String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  resetTokens    PasswordResetToken[]
+  files          File[]
+  folders        Folder[] @relation("FolderCreatedBy")
+  bookmarks      Bookmark[]
+  progress       FileProgress[]
+}
+
+model PasswordResetToken {
+  id         String   @id @default(uuid())
+  tokenHash  String
+  expiresAt  DateTime
+  used       Boolean  @default(false)
+  user       User     @relation(fields: [userId], references: [id])
+  userId     String
+  createdAt  DateTime @default(now())
+}
+
+model Folder {
+  id          String    @id @default(uuid())
+  name        String
+  description String?
+  parentId    String?
+  order       Int       @default(0)
+  parent      Folder?   @relation("FolderToFolder", fields: [parentId], references: [id])
+  children    Folder[]  @relation("FolderToFolder")
+  files       File[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  createdBy   User?     @relation("FolderCreatedBy", fields: [createdById], references: [id])
+  createdById String?
+}
+
+model File {
+  id             String    @id @default(uuid())
+  name           String
+  description    String?
+  fileType       FileType
+  googleDriveUrl String
+  order          Int       @default(0)
+  folder         Folder?   @relation(fields: [folderId], references: [id])
+  folderId       String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  owner          User?     @relation(fields: [ownerId], references: [id])
+  ownerId        String?
+  bookmarks      Bookmark[]
+  progress       FileProgress[]
+}
+
+model Bookmark {
+  id        String   @id @default(uuid())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  file      File     @relation(fields: [fileId], references: [id])
+  fileId    String
+  createdAt DateTime @default(now())
+
+  @@unique([userId, fileId])
+}
+
+model FileProgress {
+  id        String   @id @default(uuid())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  file      File     @relation(fields: [fileId], references: [id])
+  fileId    String
+  completed Boolean  @default(false)
+  lastOpenedAt DateTime?
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, fileId])
+}
+
+model Announcement {
+  id        String   @id @default(uuid())
+  content   String
+  active    Boolean  @default(true)
+  mediaUrl  String?
+  createdAt DateTime @default(now())
+  createdBy String?
+}
+
+model MediaAsset {
+  id        String   @id @default(uuid())
+  url       String
+  label     String?
+  createdAt DateTime @default(now())
+  createdBy String?
+}
