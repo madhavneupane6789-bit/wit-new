@@ -71,5 +71,12 @@ From `frontend/`:
 npm install
 npm run dev           # starts Vite dev server on 5173
 ```
+
+## Vercel Deploy (frontend)
+- In `frontend/`, `npm install && npm run build` to verify.
+- Add a Vercel project pointing to `frontend/`. Framework: Vite; Output dir: `dist`; Build command: `npm run build`.
+- Ensure `VITE_API_BASE` env on Vercel points to your deployed backend (see `frontend/vercel.json` for example).
+- Root has `vercel.json` for SPA routing.
+# wit-new
 # wit-new
 # wit-new
