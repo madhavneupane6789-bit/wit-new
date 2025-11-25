@@ -88,7 +88,7 @@ export async function forgotPasswordHandler(req: Request, res: Response, next: N
     const { email } = req.body;
     const tokenInfo = await createPasswordResetToken(email);
     if (tokenInfo) {
-      const origin = env.clientOrigins[0] || 'http://localhost:5173';
+      const origin = env.clientOrigins[0] || 'https://witnea.onrender.com';
       const link = `${origin}/reset-password/${tokenInfo.token}`;
       console.log(`Password reset link for ${email}: ${link}`);
     }
