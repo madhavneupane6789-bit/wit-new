@@ -28,10 +28,10 @@ BCRYPT_SALT_ROUNDS=10
 
 ### Frontend `.env` (./frontend/.env)
 ```
-VITE_API_BASE_URL=http://localhost:4000   # use http://backend:4000 inside Docker
+VITE_API_BASE_URL=http://localhost:4000   # use http://backend:4000 inside Docker; set to your deployed backend in prod
 ```
 
-## Run with Docker
+## Run with Docker (local)
 ```bash
 docker-compose up --build
 ```
