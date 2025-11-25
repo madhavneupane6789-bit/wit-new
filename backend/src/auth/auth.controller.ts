@@ -88,7 +88,8 @@ export async function forgotPasswordHandler(req: Request, res: Response, next: N
     const { email } = req.body;
     const tokenInfo = await createPasswordResetToken(email);
     if (tokenInfo) {
-      const link = `${env.clientOrigin}/reset-password/${tokenInfo.token}`;
+      const origin = env.clientOrigins[0] || 'http://localhost:5173';
+      const link = `${origin}/reset-password/${tokenInfo.token}`;
       console.log(`Password reset link for ${email}: ${link}`);
     }
     res.json({

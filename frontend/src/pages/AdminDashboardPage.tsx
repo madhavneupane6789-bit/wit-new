@@ -33,6 +33,8 @@ import {
 import { uploadMedia } from '../services/contentApi';
 import { changePassword } from '../services/authApi';
 import { User } from '../services/authApi';
+import { SyllabusNode, fetchSyllabusTree, updateSyllabusSection } from '../services/syllabusApi';
+import { MCQQuestion, adminCreateMcq, adminDeleteMcq, fetchMcqQuestions } from '../services/mcqApi';
 
 const findFolder = (tree: FolderNode[], id: string | null): FolderNode | null => {
   if (!id) return null;
@@ -44,6 +46,16 @@ const findFolder = (tree: FolderNode[], id: string | null): FolderNode | null =>
   return null;
 };
 
+const flattenSyllabus = (nodes: SyllabusNode[], prefix = ''): { id: string; label: string }[] => {
+  const list: { id: string; label: string }[] = [];
+  nodes.forEach((n) => {
+    const label = prefix ? `${prefix} › ${n.title}` : n.title;
+    list.push({ id: n.id, label });
+    list.push(...flattenSyllabus(n.children, label));
+  });
+  return list;
+};
+
 const AdminDashboardPage: React.FC = () => {
   const [tree, setTree] = useState<FolderNode[]>([]);
   const [rootFiles, setRootFiles] = useState<FileItem[]>([]);
@@ -51,11 +63,24 @@ const AdminDashboardPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [announcementText, setAnnouncementText] = useState('');
-  const [view, setView] = useState<'content' | 'users'>('content');
+  const [view, setView] = useState<'content' | 'users' | 'mcq'>('content');
   const [progressSummary, setProgressSummary] = useState<{ id: string; name: string; email: string; completed: number; bookmarks: number; percent: number }[]>([]);
   const [selectedUserStats, setSelectedUserStats] = useState<{ userId: string; bookmarks: number; progress: number; percent: number } | null>(null);
   const [pwdOld, setPwdOld] = useState('');
   const [pwdNew, setPwdNew] = useState('');
+  const [syllabusTree, setSyllabusTree] = useState<SyllabusNode[]>([]);
+  const [syllabusLoading, setSyllabusLoading] = useState(false);
+  const [linkingSectionId, setLinkingSectionId] = useState<string>('');
+  const [mcqForm, setMcqForm] = useState({
+    question: '',
+    optionA: '',
+    optionB: '',
+    optionC: '',
+    optionD: '',
+    correctOption: 'A' as 'A' | 'B' | 'C' | 'D',
+    explanation: '',
+  });
+  const [mcqList, setMcqList] = useState<MCQQuestion[]>([]);
 
   const [users, setUsers] = useState<User[]>([]);
   const [userForm, setUserForm] = useState({ name: '', email: '', password: '', role: 'USER' as 'USER' | 'ADMIN' });
@@ -87,6 +112,27 @@ const AdminDashboardPage: React.FC = () => {
     }
   };
 
+  const loadSyllabus = async () => {
+    setSyllabusLoading(true);
+    try {
+      const res = await fetchSyllabusTree();
+      setSyllabusTree(res.tree);
+    } catch (err: any) {
+      setError(err.message || 'Failed to load syllabus');
+    } finally {
+      setSyllabusLoading(false);
+    }
+  };
+
+  const loadMcq = async () => {
+    try {
+      const res = await fetchMcqQuestions();
+      setMcqList(res);
+    } catch (err: any) {
+      setError(err.message || 'Failed to load MCQs');
+    }
+  };
+
   const loadUsers = async () => {
     try {
       const data = await listUsers();
@@ -101,11 +147,15 @@ const AdminDashboardPage: React.FC = () => {
   useEffect(() => {
     loadContent();
     loadUsers();
+    loadSyllabus();
+    loadMcq();
   }, []);
 
   const currentFolder = useMemo(() => findFolder(tree, selectedFolder), [tree, selectedFolder]);
   const filesToShow = selectedFolder ? currentFolder?.files || [] : rootFiles;
   const folderChildren = selectedFolder ? currentFolder?.children || [] : tree;
+  const syllabusOptions = useMemo(() => flattenSyllabus(syllabusTree), [syllabusTree]);
+  const linkedSections = currentFolder?.syllabusSections || [];
 
   const openCreateFolder = () => {
     setEditingFolderId(null);
@@ -192,6 +242,26 @@ const AdminDashboardPage: React.FC = () => {
       loadContent();
     } catch (err: any) {
       setError(err.message || 'Delete failed');
+    }
+  };
+
+  const handleLinkSection = async () => {
+    if (!selectedFolder || !linkingSectionId) return;
+    try {
+      await updateSyllabusSection(linkingSectionId, { folderId: selectedFolder });
+      setLinkingSectionId('');
+      await Promise.all([loadSyllabus(), loadContent()]);
+    } catch (err: any) {
+      setError(err.message || 'Failed to link syllabus');
+    }
+  };
+
+  const handleUnlinkSection = async (sectionId: string) => {
+    try {
+      await updateSyllabusSection(sectionId, { folderId: null });
+      await Promise.all([loadSyllabus(), loadContent()]);
+    } catch (err: any) {
+      setError(err.message || 'Failed to unlink syllabus');
     }
   };
 
@@ -310,6 +380,9 @@ const AdminDashboardPage: React.FC = () => {
         <Button variant={view === 'users' ? 'primary' : 'ghost'} onClick={() => setView('users')}>
           Users
         </Button>
+        <Button variant={view === 'mcq' ? 'primary' : 'ghost'} onClick={() => setView('mcq' as any)}>
+          MCQ Bank
+        </Button>
       </div>
 
       {view === 'content' && (
@@ -416,6 +489,40 @@ const AdminDashboardPage: React.FC = () => {
                         </div>
                       )}
                     </Droppable>
+                    <div className="mt-4 space-y-2 rounded-2xl border border-slate-100 bg-white/80 p-3">
+                      <div className="flex items-center justify-between">
+                        <p className="text-xs font-semibold text-slate-600">Syllabus mapping</p>
+                        <Button variant="ghost" onClick={loadSyllabus} disabled={syllabusLoading}>
+                          Refresh
+                        </Button>
+                      </div>
+                      {linkedSections.length === 0 && <p className="text-sm text-slate-500">No syllabus linked to this folder.</p>}
+                      {linkedSections.map((s) => (
+                        <div key={s.id} className="flex items-center justify-between rounded-xl border border-slate-100 bg-white/70 px-3 py-2 text-sm">
+                          <span>{s.title}</span>
+                          <Button variant="ghost" onClick={() => handleUnlinkSection(s.id)}>
+                            Unlink
+                          </Button>
+                        </div>
+                      ))}
+                      <div className="flex flex-col gap-2 rounded-xl border border-slate-100 bg-white/70 px-3 py-3">
+                        <select
+                          value={linkingSectionId}
+                          onChange={(e) => setLinkingSectionId(e.target.value)}
+                          className="rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                        >
+                          <option value="">Select syllabus section</option>
+                          {syllabusOptions.map((opt) => (
+                            <option key={opt.id} value={opt.id}>
+                              {opt.label}
+                            </option>
+                          ))}
+                        </select>
+                        <Button onClick={handleLinkSection} disabled={!linkingSectionId || !selectedFolder}>
+                          Link to this folder
+                        </Button>
+                      </div>
+                    </div>
                     <Droppable droppableId="files">
                       {(provided) => (
                         <div ref={provided.innerRef} {...provided.droppableProps} className="space-y-2 pt-4">
@@ -584,6 +691,113 @@ const AdminDashboardPage: React.FC = () => {
                   </div>
                 ))}
               </div>
+            </div>
+          </Card>
+        </div>
+      )}
+
+      {view === 'mcq' && (
+        <div className="space-y-6">
+          <Card className="bg-white/90">
+            <p className="text-xs uppercase tracking-[0.22em] text-slate-500">Add MCQ</p>
+            <form
+              className="mt-3 grid gap-3 md:grid-cols-2"
+              onSubmit={async (e) => {
+                e.preventDefault();
+                try {
+                  await adminCreateMcq(mcqForm);
+                  setMcqForm({ ...mcqForm, question: '', optionA: '', optionB: '', optionC: '', optionD: '', explanation: '' });
+                  await loadMcq();
+                  alert('Question added');
+                } catch (err: any) {
+                  setError(err.message || 'Failed to add question');
+                }
+              }}
+            >
+              <textarea
+                className="md:col-span-2 rounded-xl border border-slate-200 bg-white/80 px-3 py-2 text-midnight focus:border-blue-400 focus:outline-none"
+                placeholder="Question"
+                value={mcqForm.question}
+                onChange={(e) => setMcqForm((p) => ({ ...p, question: e.target.value }))}
+                required
+              />
+              {(['optionA', 'optionB', 'optionC', 'optionD'] as const).map((field, idx) => (
+                <input
+                  key={field}
+                  className="rounded-xl border border-slate-200 bg-white/80 px-3 py-2 text-midnight focus:border-blue-400 focus:outline-none"
+                  placeholder={`Option ${String.fromCharCode(65 + idx)}`}
+                  value={mcqForm[field]}
+                  onChange={(e) => setMcqForm((p) => ({ ...p, [field]: e.target.value }))}
+                  required
+                />
+              ))}
+              <div className="flex items-center gap-3">
+                <label className="text-sm font-semibold text-midnight">Correct</label>
+                <select
+                  className="rounded-xl border border-slate-200 bg-white/80 px-3 py-2 text-midnight focus:border-blue-400 focus:outline-none"
+                  value={mcqForm.correctOption}
+                  onChange={(e) => setMcqForm((p) => ({ ...p, correctOption: e.target.value as 'A' | 'B' | 'C' | 'D' }))}
+                >
+                  <option value="A">A</option>
+                  <option value="B">B</option>
+                  <option value="C">C</option>
+                  <option value="D">D</option>
+                </select>
+              </div>
+              <textarea
+                className="md:col-span-2 rounded-xl border border-slate-200 bg-white/80 px-3 py-2 text-midnight focus:border-blue-400 focus:outline-none"
+                placeholder="Explanation (optional)"
+                value={mcqForm.explanation}
+                onChange={(e) => setMcqForm((p) => ({ ...p, explanation: e.target.value }))}
+              />
+              <Button type="submit" className="md:col-span-2">
+                Save question
+              </Button>
+            </form>
+          </Card>
+          <Card className="bg-white/90">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs uppercase tracking-[0.22em] text-slate-500">Question Bank</p>
+                <h3 className="text-xl font-semibold text-midnight">Recent questions</h3>
+              </div>
+              <Button variant="ghost" onClick={loadMcq}>
+                Refresh
+              </Button>
+            </div>
+            <div className="mt-3 space-y-3">
+              {mcqList.length === 0 && <p className="text-sm text-slate-500">No questions yet.</p>}
+              {mcqList.map((q) => (
+                <div key={q.id} className="rounded-2xl border border-slate-100 bg-white/80 p-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <p className="font-semibold text-midnight">{q.question}</p>
+                      <ul className="mt-2 list-disc space-y-1 pl-4 text-sm text-slate-600">
+                        <li>A. {q.optionA}</li>
+                        <li>B. {q.optionB}</li>
+                        <li>C. {q.optionC}</li>
+                        <li>D. {q.optionD}</li>
+                      </ul>
+                      <p className="mt-2 text-xs text-emerald-600">Correct: {q.correctOption}</p>
+                      {q.explanation && <p className="text-xs text-slate-500">Explanation: {q.explanation}</p>}
+                    </div>
+                    <Button
+                      variant="ghost"
+                      onClick={async () => {
+                        if (!confirm('Delete this question?')) return;
+                        try {
+                          await adminDeleteMcq(q.id);
+                          await loadMcq();
+                        } catch (err: any) {
+                          setError(err.message || 'Delete failed');
+                        }
+                      }}
+                    >
+                      Delete
+                    </Button>
+                  </div>
+                </div>
+              ))}
             </div>
           </Card>
         </div>

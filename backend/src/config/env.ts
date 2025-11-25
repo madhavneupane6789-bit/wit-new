@@ -9,7 +9,15 @@ export const env = {
   jwtRefreshSecret: process.env.JWT_REFRESH_SECRET || 'refreshsecret',
   accessTokenExpiresIn: process.env.ACCESS_TOKEN_EXPIRES_IN || '15m',
   refreshTokenExpiresIn: process.env.REFRESH_TOKEN_EXPIRES_IN || '7d',
-  clientOrigin: process.env.CLIENT_ORIGIN || 'http://localhost:5173',
+  clientOrigins:
+    (process.env.CLIENT_ORIGINS || process.env.CLIENT_ORIGIN || 'http://localhost:5173,http://127.0.0.1:5173')
+      .split(',')
+      .map((o) => o.trim())
+      .filter(Boolean),
   cookieSecure: process.env.COOKIE_SECURE === 'true',
   bcryptSaltRounds: Number(process.env.BCRYPT_SALT_ROUNDS || 10),
+  googleServiceEmail: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL || '',
+  googleServicePrivateKey: process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY
+    ? process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY.replace(/\\n/g, '\n')
+    : '',
 };

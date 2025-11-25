@@ -18,6 +18,7 @@ export type FolderNode = {
   description?: string | null;
   parentId?: string | null;
   children: FolderNode[];
+  syllabusSections?: { id: string; title: string }[];
   files: FileItem[];
 };
 

@@ -21,14 +21,14 @@ JWT_ACCESS_SECRET=your_access_secret
 JWT_REFRESH_SECRET=your_refresh_secret
 ACCESS_TOKEN_EXPIRES_IN=15m
 REFRESH_TOKEN_EXPIRES_IN=7d
-CLIENT_ORIGIN=http://localhost:5173
+CLIENT_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
 COOKIE_SECURE=false
 BCRYPT_SALT_ROUNDS=10
 ```
 
 ### Frontend `.env` (./frontend/.env)
 ```
-VITE_API_BASE=http://localhost:4000   # use http://backend:4000 inside Docker
+VITE_API_BASE_URL=http://localhost:4000   # use http://backend:4000 inside Docker
 ```
 
 ## Run with Docker
@@ -75,10 +75,18 @@ npm run dev           # starts Vite dev server on 5173
 ## Vercel Deploy (frontend)
 - In `frontend/`, `npm install && npm run build` to verify.
 - Add a Vercel project pointing to `frontend/`. Framework: Vite; Output dir: `dist`; Build command: `npm run build`.
-- Ensure `VITE_API_BASE` env on Vercel points to your deployed backend (see `frontend/vercel.json` for example).
+- Ensure `VITE_API_BASE_URL` env on Vercel points to your deployed backend (see `frontend/vercel.json` for example).
 - Root has `vercel.json` for SPA routing.
-# wit-new
-# wit-new
-# wit-new
-# wit-new
-# wit-new
+
+## Deploying to Railway
+1. Push this repo to GitHub.
+2. Create a Railway project and add a PostgreSQL database.
+3. Backend service:
+   - Deploy from GitHub, set root to `backend/`.
+   - Start command: `npm run start:prod`.
+   - Vars: `DATABASE_URL` (from DB Connect), `PORT=4000`, `NODE_ENV=production`, `JWT_ACCESS_SECRET`, `JWT_REFRESH_SECRET`, `ACCESS_TOKEN_EXPIRES_IN=15m`, `REFRESH_TOKEN_EXPIRES_IN=7d`, `CLIENT_ORIGINS` (comma-separated frontend/backends), `COOKIE_SECURE=true`, `BCRYPT_SALT_ROUNDS=10`.
+4. Frontend service (optional):
+   - Deploy from GitHub, root `frontend/`.
+   - Build: `npm run build`; Start: `npm run preview`.
+   - Vars: `VITE_API_BASE_URL=https://<backend-public-url>`.
+5. Ensure backend CORS allows the frontend URL(s).

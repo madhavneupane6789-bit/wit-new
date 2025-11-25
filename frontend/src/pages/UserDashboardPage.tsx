@@ -19,6 +19,9 @@ import {
 } from '../services/contentApi';
 import { changePassword } from '../services/authApi';
 import { useAuth } from '../hooks/useAuth';
+import { SyllabusNode, fetchSyllabusTree } from '../services/syllabusApi';
+import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 const findFolder = (tree: FolderNode[], id: string | null): FolderNode | null => {
   if (!id) return null;
@@ -30,8 +33,72 @@ const findFolder = (tree: FolderNode[], id: string | null): FolderNode | null =>
   return null;
 };
 
+const findSyllabus = (tree: SyllabusNode[], id: string | null): SyllabusNode | null => {
+  if (!id) return null;
+  for (const node of tree) {
+    if (node.id === id) return node;
+    const found = findSyllabus(node.children, id);
+    if (found) return found;
+  }
+  return null;
+};
+
+const extractDriveId = (url: string): string | null => {
+  // Patterns: /file/d/<id>/view, ?id=<id>, uc?id=<id>
+  const matchPath = url.match(/\/d\/([^/]+)/);
+  if (matchPath && matchPath[1]) return matchPath[1];
+  const query = url.includes('?') ? url.split('?')[1] : '';
+  const params = new URLSearchParams(query);
+  const qId = params.get('id');
+  if (qId) return qId;
+  return null;
+};
+
+const SyllabusTreeItem: React.FC<{
+  node: SyllabusNode;
+  depth: number;
+  selected: string | null;
+  onSelect: (id: string) => void;
+}> = ({ node, depth, selected, onSelect }) => {
+  const [open, setOpen] = useState(true);
+  return (
+    <div>
+      <button
+        className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-left transition hover:bg-white/70 ${
+          selected === node.id ? 'bg-blue-50 border border-blue-200 shadow text-blue-900' : ''
+        }`}
+        style={{ paddingLeft: 12 + depth * 12 }}
+        onClick={() => onSelect(node.id)}
+      >
+        <div className="flex items-center gap-2">
+          <span
+            className="flex h-6 w-6 items-center justify-center rounded-full border border-slate-200 bg-white text-xs text-blue-600"
+            onClick={(e) => {
+              e.stopPropagation();
+              setOpen((p) => !p);
+            }}
+          >
+            {open ? '–' : '+'}
+          </span>
+          <span className="font-medium text-midnight">{node.title}</span>
+        </div>
+      </button>
+      <motion.div initial={false} animate={{ height: open ? 'auto' : 0, opacity: open ? 1 : 0 }} transition={{ duration: 0.2 }}>
+        {open && node.children.length > 0 && (
+          <div className="ml-4 border-l border-slate-100 pl-3">
+            {node.children.map((child) => (
+              <SyllabusTreeItem key={child.id} node={child} depth={depth + 1} selected={selected} onSelect={onSelect} />
+            ))}
+          </div>
+        )}
+      </motion.div>
+    </div>
+  );
+};
+
 const UserDashboardPage: React.FC = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [tree, setTree] = useState<FolderNode[]>([]);
   const [rootFiles, setRootFiles] = useState<FileItem[]>([]);
   const [selectedFolder, setSelectedFolder] = useState<string | null>(null);
@@ -43,7 +110,11 @@ const UserDashboardPage: React.FC = () => {
   const [pwdOld, setPwdOld] = useState('');
   const [pwdNew, setPwdNew] = useState('');
   const [uploading, setUploading] = useState(false);
-  const [activeTab, setActiveTab] = useState<'library' | 'bookmarks' | 'read'>('library');
+  const [activeTab, setActiveTab] = useState<'library' | 'bookmarks' | 'read' | 'syllabus'>('library');
+  const [syllabusTree, setSyllabusTree] = useState<SyllabusNode[]>([]);
+  const [selectedSection, setSelectedSection] = useState<string | null>(null);
+  const [syllabusLoading, setSyllabusLoading] = useState(false);
+  const [playerFile, setPlayerFile] = useState<{ id: string; name: string; src: string } | null>(null);
 
   const load = async () => {
     setLoading(true);
@@ -61,6 +132,19 @@ const UserDashboardPage: React.FC = () => {
     }
   };
 
+  const loadSyllabus = async () => {
+    setSyllabusLoading(true);
+    try {
+      const res = await fetchSyllabusTree();
+      setSyllabusTree(res.tree);
+      if (res.tree[0]) setSelectedSection((prev) => prev || res.tree[0].id);
+    } catch (err: any) {
+      setError(err.message || 'Failed to load syllabus');
+    } finally {
+      setSyllabusLoading(false);
+    }
+  };
+
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -75,12 +159,18 @@ const UserDashboardPage: React.FC = () => {
 
   useEffect(() => {
     load();
+    loadSyllabus();
     const t = setInterval(() => setNow(new Date().toLocaleString()), 1000);
     return () => clearInterval(t);
   }, []);
 
   const currentFolder = useMemo(() => findFolder(tree, selectedFolder), [tree, selectedFolder]);
   const filesToShow = selectedFolder ? currentFolder?.files || [] : rootFiles;
+  const currentSection = useMemo(() => findSyllabus(syllabusTree, selectedSection), [syllabusTree, selectedSection]);
+  const viewSyllabus = (sectionId: string) => {
+    setSelectedSection(sectionId);
+    setActiveTab('syllabus');
+  };
 
   const allFiles = useMemo(() => {
     const flat: FileItem[] = [...rootFiles];
@@ -128,7 +218,13 @@ const UserDashboardPage: React.FC = () => {
       // non-blocking
       console.warn(err);
     } finally {
-      window.open(file.googleDriveUrl, '_blank');
+      if (file.fileType === 'VIDEO') {
+        const fileId = extractDriveId(file.googleDriveUrl);
+        const preview = fileId ? `https://drive.google.com/file/d/${fileId}/preview` : file.googleDriveUrl;
+        setPlayerFile({ id: fileId || file.id, name: file.name, src: preview });
+      } else {
+        window.open(file.googleDriveUrl, '_blank');
+      }
     }
   };
 
@@ -159,6 +255,12 @@ const UserDashboardPage: React.FC = () => {
         <Button variant={activeTab === 'read' ? 'primary' : 'ghost'} onClick={() => setActiveTab('read')}>
           Completed
         </Button>
+        <Button variant={activeTab === 'syllabus' ? 'primary' : 'ghost'} onClick={() => setActiveTab('syllabus')}>
+          Syllabus
+        </Button>
+        <Link to="/mcq">
+          <Button variant="ghost">MCQ Practice</Button>
+        </Link>
         <div className="ml-auto text-sm text-slate-500">Local time: {now}</div>
       </div>
 
@@ -264,6 +366,21 @@ const UserDashboardPage: React.FC = () => {
                       </Button>
                     )}
                   </div>
+                  {currentFolder?.syllabusSections && currentFolder.syllabusSections.length > 0 && (
+                    <div className="mt-3 rounded-xl border border-blue-100 bg-blue-50/70 p-3 text-sm text-blue-800">
+                      <p className="text-xs uppercase tracking-[0.2em] text-blue-700">Related syllabus</p>
+                      <ul className="mt-1 list-disc space-y-1 pl-4">
+                        {currentFolder.syllabusSections.map((s) => (
+                          <li key={s.id} className="flex items-center justify-between">
+                            <span>{s.title}</span>
+                            <Button variant="ghost" onClick={() => viewSyllabus(s.id)}>
+                              View
+                            </Button>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                   <div className="mt-3 space-y-3">
                     {filesToShow && filesToShow.length > 0 ? (
                       filesToShow.map((file) => (
@@ -399,6 +516,47 @@ const UserDashboardPage: React.FC = () => {
         </div>
       )}
 
+      {activeTab === 'syllabus' && (
+        <div className="grid gap-6 lg:grid-cols-[320px,1fr]">
+          <Card className="bg-white/80">
+            <div className="mb-3 flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-midnight">Syllabus</h3>
+              <Button variant="ghost" onClick={() => navigate('/syllabus/full')}>
+                Full view
+              </Button>
+            </div>
+            {syllabusLoading ? (
+              <Spinner />
+            ) : (
+              <div className="space-y-1 text-sm">
+                {syllabusTree.map((node) => (
+                  <SyllabusTreeItem
+                    key={node.id}
+                    node={node}
+                    depth={0}
+                    selected={selectedSection}
+                    onSelect={(id) => setSelectedSection(id)}
+                  />
+                ))}
+              </div>
+            )}
+          </Card>
+          <Card className="bg-white/80">
+            {syllabusLoading ? (
+              <Spinner />
+            ) : currentSection ? (
+              <div className="space-y-3">
+                <p className="text-xs uppercase tracking-[0.22em] text-slate-500">Section</p>
+                <h3 className="text-2xl font-semibold text-midnight">{currentSection.title}</h3>
+                <p className="whitespace-pre-line text-sm leading-relaxed text-slate-700">{currentSection.content}</p>
+              </div>
+            ) : (
+              <p className="text-sm text-slate-500">Select a syllabus section to view details.</p>
+            )}
+          </Card>
+        </div>
+      )}
+
       <div className="mt-6 grid gap-4 md:grid-cols-2">
         <Card className="bg-white/80">
           <p className="text-xs uppercase tracking-[0.22em] text-slate-500">Change Password</p>
@@ -425,6 +583,32 @@ const UserDashboardPage: React.FC = () => {
           </form>
         </Card>
       </div>
+
+      {playerFile && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/70 px-4">
+          <div className="w-full max-w-4xl rounded-2xl bg-white p-4 shadow-2xl">
+            <div className="mb-3 flex items-center justify-between">
+              <div>
+                <p className="text-xs uppercase tracking-[0.22em] text-slate-500">Now playing</p>
+                <h3 className="text-lg font-semibold text-midnight">{playerFile.name}</h3>
+              </div>
+              <Button variant="ghost" onClick={() => setPlayerFile(null)}>
+                Close
+              </Button>
+            </div>
+            <div className="overflow-hidden rounded-xl border border-slate-200 bg-black">
+              <iframe
+                key={playerFile.src}
+                src={playerFile.src}
+                className="h-[480px] w-full"
+                allow="autoplay; encrypted-media"
+                allowFullScreen
+                title="Drive video player"
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </DashboardLayout>
   );
 };

@@ -7,6 +7,9 @@ import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import UserDashboardPage from './pages/UserDashboardPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
+import SyllabusPage from './pages/SyllabusPage';
+import SyllabusFullPage from './pages/SyllabusFullPage';
+import MCQPracticePage from './pages/MCQPracticePage';
 import { useAuth } from './hooks/useAuth';
 import { Spinner } from './components/UI/Spinner';
 
@@ -82,6 +85,30 @@ const AppRouter: React.FC = () => (
         element={
           <RequireAuth adminOnly>
             <AdminDashboardPage />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/mcq"
+        element={
+          <RequireAuth>
+            <MCQPracticePage />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/syllabus"
+        element={
+          <RequireAuth>
+            <SyllabusPage />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/syllabus/full"
+        element={
+          <RequireAuth>
+            <SyllabusFullPage />
           </RequireAuth>
         }
       />

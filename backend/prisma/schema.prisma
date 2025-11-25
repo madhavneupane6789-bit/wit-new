@@ -17,6 +17,13 @@ enum FileType {
   PDF
 }
 
+enum MCQOption {
+  A
+  B
+  C
+  D
+}
+
 model User {
   id             String   @id @default(uuid())
   name           String
@@ -57,6 +64,7 @@ model Folder {
   parent      Folder?   @relation("FolderToFolder", fields: [parentId], references: [id])
   children    Folder[]  @relation("FolderToFolder")
   files       File[]
+  syllabusSections SyllabusSection[]
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   createdBy   User?     @relation("FolderCreatedBy", fields: [createdById], references: [id])
@@ -119,4 +127,31 @@ model MediaAsset {
   label     String?
   createdAt DateTime @default(now())
   createdBy String?
+}
+
+model SyllabusSection {
+  id        String   @id @default(uuid())
+  title     String
+  content   String
+  order     Int      @default(0)
+  parentId  String?
+  parent    SyllabusSection? @relation("SyllabusToSyllabus", fields: [parentId], references: [id])
+  children  SyllabusSection[] @relation("SyllabusToSyllabus")
+  folderId  String?
+  folder    Folder?  @relation(fields: [folderId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model MCQQuestion {
+  id            String     @id @default(uuid())
+  question      String
+  optionA       String
+  optionB       String
+  optionC       String
+  optionD       String
+  correctOption MCQOption
+  explanation   String?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
 }

@@ -6,6 +6,6 @@ const PORT = Number(env.port) || 4000;
 
 const server = http.createServer(app);
 
-server.listen(PORT, () => {
+server.listen(PORT, '0.0.0.0', () => {
   console.log(`API listening on port ${PORT}`);
 });

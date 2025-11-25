@@ -18,11 +18,11 @@ const LandingPage: React.FC = () => {
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
             <p className="text-sm font-semibold uppercase tracking-[0.28em] text-slate-500">Education Hub</p>
             <h1 className="mt-4 text-5xl font-extrabold leading-tight text-midnight">
-              Learn with clarity. Manage with elegance.
+              Structured learning. Effortless control.
             </h1>
             <p className="mt-4 max-w-xl text-lg text-slate-600">
-              A modern platform inspired by Apple’s calm precision. Streamlined access for learners and a powerful admin
-              workspace for curators.
+              Browse a nested content library of videos, PDFs, and syllabus links. Learners get fast, organized access; admins curate and
+              reorder with instant updates.
             </p>
             <div className="mt-6 flex flex-wrap items-center gap-4">
               <Link to="/login">
@@ -55,28 +55,28 @@ const LandingPage: React.FC = () => {
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.6 }}
         >
-          <div className="glass relative rounded-3xl border border-white/60 p-6 shadow-2xl">
+          <div className="glass relative rounded-3xl border border-white/60 p-6 shadow-2xl" style={{ fontFamily: '"SF Pro Display", "Inter", system-ui, -apple-system, sans-serif' }}>
             <div className="absolute inset-x-6 top-6 h-32 rounded-2xl bg-gradient-to-r from-blue-500/60 via-cyan-400/50 to-emerald-400/50 blur-3xl" />
             <div className="relative z-10 space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs uppercase tracking-[0.28em] text-white/80">Library Preview</p>
-                  <h3 className="text-2xl font-semibold text-white">Liquid Explorer</h3>
+                  <p className="text-xs uppercase tracking-[0.28em] text-slate-900">Library Preview</p>
+                  <h3 className="text-2xl font-semibold text-slate-900 drop-shadow">Liquid Explorer</h3>
                 </div>
-                <span className="rounded-full bg-white/20 px-3 py-1 text-xs font-semibold text-white">Live</span>
+                <span className="rounded-full bg-white/70 px-3 py-1 text-xs font-semibold text-slate-900 shadow-sm">Live</span>
               </div>
-              <div className="space-y-3 rounded-2xl bg-white/30 p-4 text-sm text-white backdrop-blur-lg">
-                <div className="flex items-center justify-between rounded-xl bg-white/10 p-3">
-                  <span>Physics / Quantum</span>
-                  <span className="rounded-full bg-white/20 px-3 py-1 text-xs">Video</span>
+              <div className="space-y-3 rounded-2xl bg-white/70 p-4 text-sm text-slate-900 backdrop-blur-lg shadow-inner">
+                <div className="flex items-center justify-between rounded-xl bg-white px-3 py-3 shadow-sm">
+                  <span className="font-semibold">Power Systems / Load Flow</span>
+                  <span className="rounded-full bg-slate-900 px-3 py-1 text-xs font-semibold text-white">Video</span>
                 </div>
-                <div className="flex items-center justify-between rounded-xl bg-white/10 p-3">
-                  <span>Calculus Notes</span>
-                  <span className="rounded-full bg-white/20 px-3 py-1 text-xs">PDF</span>
+                <div className="flex items-center justify-between rounded-xl bg-white px-3 py-3 shadow-sm">
+                  <span className="font-semibold">Control & Instrumentation Notes</span>
+                  <span className="rounded-full bg-slate-900 px-3 py-1 text-xs font-semibold text-white">PDF</span>
                 </div>
-                <div className="flex items-center justify-between rounded-xl bg-white/10 p-3">
-                  <span>World History / Renaissance</span>
-                  <span className="rounded-full bg-white/20 px-3 py-1 text-xs">Video</span>
+                <div className="flex items-center justify-between rounded-xl bg-white px-3 py-3 shadow-sm">
+                  <span className="font-semibold">NEA Level 7 Syllabus</span>
+                  <span className="rounded-full bg-slate-900 px-3 py-1 text-xs font-semibold text-white">Linked</span>
                 </div>
               </div>
             </div>

@@ -3,18 +3,20 @@ import { prisma } from '../config/db';
 import { AppError } from '../middleware/errorHandler';
 
 export type FileWithMeta = File & { bookmarked?: boolean; completed?: boolean; lastOpenedAt?: Date | null };
-export type FolderNode = Folder & { children: FolderNode[]; files: FileWithMeta[] };
+export type SyllabusLink = { id: string; title: string };
+export type FolderNode = Folder & { children: FolderNode[]; files: FileWithMeta[]; syllabusSections: SyllabusLink[] };
 export type FolderTreeResponse = { tree: FolderNode[]; rootFiles: FileWithMeta[]; progress?: number };
 
 function buildFolderTree(
   folders: Folder[],
   files: FileWithMeta[],
+  syllabusByFolder: Map<string, SyllabusLink[]>,
   userMeta?: { bookmarked: Set<string>; completed: Set<string>; opened: Map<string, Date | null>; totalFiles: number },
 ): FolderTreeResponse {
   const folderMap = new Map<string, FolderNode>();
 
   folders.forEach((folder) => {
-    folderMap.set(folder.id, { ...folder, children: [], files: [] });
+    folderMap.set(folder.id, { ...folder, children: [], files: [], syllabusSections: syllabusByFolder.get(folder.id) || [] });
   });
 
   const rootFiles: FileWithMeta[] = [];
@@ -50,13 +52,23 @@ function buildFolderTree(
 }
 
 export async function getFolderTree(userId?: string): Promise<FolderTreeResponse> {
-  const [folders, files] = await Promise.all([
+  const [folders, files, syllabusSections] = await Promise.all([
     prisma.folder.findMany({ orderBy: [{ order: 'asc' }, { name: 'asc' }] }),
     prisma.file.findMany({ orderBy: [{ order: 'asc' }, { name: 'asc' }] }),
+    prisma.syllabusSection.findMany({ select: { id: true, title: true, folderId: true } }),
   ]);
 
+  const syllabusByFolder = new Map<string, SyllabusLink[]>();
+  syllabusSections.forEach((section) => {
+    if (section.folderId) {
+      const list = syllabusByFolder.get(section.folderId) || [];
+      list.push({ id: section.id, title: section.title });
+      syllabusByFolder.set(section.folderId, list);
+    }
+  });
+
   if (!userId) {
-    return buildFolderTree(folders, files);
+    return buildFolderTree(folders, files, syllabusByFolder);
   }
 
   const [bookmarks, progress] = await Promise.all([
@@ -67,7 +79,12 @@ export async function getFolderTree(userId?: string): Promise<FolderTreeResponse
   const completedSet = new Set(progress.filter((p) => p.completed).map((p) => p.fileId));
   const openedMap = new Map(progress.map((p) => [p.fileId, p.lastOpenedAt]));
 
-  return buildFolderTree(folders, files, { bookmarked: bookmarkedSet, completed: completedSet, opened: openedMap, totalFiles: files.length });
+  return buildFolderTree(folders, files, syllabusByFolder, {
+    bookmarked: bookmarkedSet,
+    completed: completedSet,
+    opened: openedMap,
+    totalFiles: files.length,
+  });
 }
 
 export async function createFolder(params: { name: string; description?: string; parentId?: string; userId?: string }) {

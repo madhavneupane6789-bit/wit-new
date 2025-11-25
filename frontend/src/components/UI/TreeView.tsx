@@ -46,7 +46,7 @@ const TreeItem: React.FC<ItemProps> = ({ node, depth, selectedId, onSelect }) =>
       <button
         className={clsx(
           'flex w-full items-center justify-between rounded-xl px-3 py-2 text-left transition hover:bg-white/70',
-          selectedId === node.id && 'bg-white/80 shadow',
+          selectedId === node.id && 'bg-blue-50 border border-blue-200 shadow text-blue-900',
         )}
         style={{ paddingLeft: 12 + depth * 12 }}
         onClick={() => onSelect(node.id)}

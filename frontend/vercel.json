@@ -11,6 +11,6 @@
     { "src": "/(.*)", "dest": "/" }
   ],
   "env": {
-    "VITE_API_BASE": "https://your-backend.example.com"
+    "VITE_API_BASE_URL": "https://your-backend.example.com"
   }
 }
