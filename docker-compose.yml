@@ -20,8 +20,6 @@ services:
       - db
     ports:
       - '4000:4000'
-    environment:
-      DATABASE_URL: ${DATABASE_URL:-postgresql://edu_user:edu_password@db:5432/edu_platform?schema=public}
 
   frontend:
     build: ./frontend

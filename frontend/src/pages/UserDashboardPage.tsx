@@ -115,6 +115,7 @@ const UserDashboardPage: React.FC = () => {
   const [selectedSection, setSelectedSection] = useState<string | null>(null);
   const [syllabusLoading, setSyllabusLoading] = useState(false);
   const [playerFile, setPlayerFile] = useState<{ id: string; name: string; src: string } | null>(null);
+  const [requestMessage, setRequestMessage] = useState('');
 
   const load = async () => {
     setLoading(true);
@@ -283,12 +284,31 @@ const UserDashboardPage: React.FC = () => {
             <p className="mt-1 text-xs text-slate-500">{overallProgress}% completed</p>
           </div>
         </Card>
-        <Card className="bg-gradient-to-br from-blue-500/90 to-cyan-400/80 text-white">
-          <p className="text-xs uppercase tracking-[0.22em] text-white/80">Status</p>
-          <h3 className="mt-2 text-xl font-semibold">Access</h3>
-          <p className="text-sm text-white/80">
-            {user?.isApproved ? 'Content unlocked by admin.' : 'Waiting for admin approval. Contact support to unlock.'}
+        <Card className="bg-white/90 text-midnight">
+          <p className="text-xs uppercase tracking-[0.22em] text-slate-500">Feedback</p>
+          <h3 className="mt-2 text-xl font-semibold text-midnight">Message admin</h3>
+          <p className="text-sm text-slate-600">
+            Share issues or requests with the admin team. Keep your account details handy for quick follow-up.
           </p>
+          <div className="mt-3 space-y-2 rounded-xl border border-slate-100 bg-white p-3 text-midnight">
+            <textarea
+              className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm focus:border-blue-400 focus:outline-none"
+              placeholder="Type your message..."
+              value={requestMessage}
+              onChange={(e) => setRequestMessage(e.target.value)}
+              rows={3}
+            />
+            <Button
+              variant="primary"
+              onClick={() => {
+                if (!requestMessage.trim()) return;
+                alert('Request sent to admin.');
+                setRequestMessage('');
+              }}
+            >
+              Send request
+            </Button>
+          </div>
         </Card>
         <Card className="bg-white/80">
           <div className="flex items-center justify-between">
