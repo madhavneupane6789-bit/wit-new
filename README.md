@@ -28,7 +28,7 @@ BCRYPT_SALT_ROUNDS=10
 
 ### Frontend `.env` (./frontend/.env)
 ```
-VITE_API_BASE_URL=http://localhost:4000   # use http://backend:4000 inside Docker; set to your deployed backend in prod (e.g. https://wit-new-1.onrender.com)
+VITE_API_BASE_URL=https://wit-new-1.onrender.com   # override with your backend URL; for local dev set to http://localhost:4000 if you run backend locally
 ```
 
 ## Run with Docker (local)
@@ -36,7 +36,7 @@ VITE_API_BASE_URL=http://localhost:4000   # use http://backend:4000 inside Docke
 docker-compose up --build
 ```
 - Frontend: http://localhost:5173
-- Backend API: http://localhost:4000
+- Backend API: http://localhost:4000 (local dev) / your deployed backend URL in prod
 - Postgres: port 5432 (local)
 
 The backend container runs `prisma db push`, seeds the default admin, and starts the API automatically.

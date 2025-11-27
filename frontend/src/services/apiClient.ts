@@ -1,10 +1,9 @@
 import axios from 'axios';
 
-const isProd = import.meta.env.PROD;
 const envBase = import.meta.env.VITE_API_BASE_URL?.trim();
 
-// In production, always point to the deployed backend to avoid localhost/cached misconfigurations.
-const baseURL = isProd ? 'https://wit-new-1.onrender.com' : envBase || 'http://localhost:4000';
+// Always point to the deployed backend unless an explicit env override is provided (for local dev).
+const baseURL = envBase || 'https://wit-new-1.onrender.com';
 
 const api = axios.create({
   baseURL,
