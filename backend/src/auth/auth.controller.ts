@@ -11,20 +11,21 @@ import {
 } from './auth.service';
 import { AppError } from '../middleware/errorHandler';
 
-const accessCookieOptions = {
+const baseCookieOptions = {
   httpOnly: true,
-  sameSite: 'lax' as const,
   secure: env.cookieSecure,
-  maxAge: 1000 * 60 * 15,
+  sameSite: 'none' as const, // required for cross-site cookies
   path: '/',
 };
 
+const accessCookieOptions = {
+  ...baseCookieOptions,
+  maxAge: 1000 * 60 * 15,
+};
+
 const refreshCookieOptions = {
-  httpOnly: true,
-  sameSite: 'lax' as const,
-  secure: env.cookieSecure,
+  ...baseCookieOptions,
   maxAge: 1000 * 60 * 60 * 24 * 7,
-  path: '/',
 };
 
 function setAuthCookies(res: Response, tokens: { accessToken: string; refreshToken: string }) {

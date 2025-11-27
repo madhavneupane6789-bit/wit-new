@@ -8,6 +8,7 @@ export function requireAuth(req: Request, _res: Response, next: NextFunction) {
     const token = req.cookies?.accessToken || bearer;
 
     if (!token) {
+      console.warn('requireAuth: no token found (cookie or bearer)');
       throw new AppError(401, 'Unauthorized');
     }
 
@@ -15,6 +16,7 @@ export function requireAuth(req: Request, _res: Response, next: NextFunction) {
     req.user = { id: payload.userId, role: payload.role };
     next();
   } catch (err) {
+    console.warn('requireAuth: token verification failed');
     next(new AppError(401, 'Unauthorized'));
   }
 }

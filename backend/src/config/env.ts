@@ -9,14 +9,7 @@ export const env = {
   jwtRefreshSecret: process.env.JWT_REFRESH_SECRET || 'refreshsecret',
   accessTokenExpiresIn: process.env.ACCESS_TOKEN_EXPIRES_IN || '15m',
   refreshTokenExpiresIn: process.env.REFRESH_TOKEN_EXPIRES_IN || '7d',
-  clientOrigins: (
-    process.env.CLIENT_ORIGINS ||
-    process.env.CLIENT_ORIGIN ||
-    'https://witnea.onrender.com,http://localhost:5173,http://127.0.0.1:5173'
-  )
-    .split(',')
-    .map((o) => o.trim())
-    .filter(Boolean),
+  clientOrigin: (process.env.CLIENT_ORIGIN || '').trim(),
   cookieSecure: process.env.COOKIE_SECURE === 'true',
   bcryptSaltRounds: Number(process.env.BCRYPT_SALT_ROUNDS || 10),
   googleServiceEmail: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL || '',

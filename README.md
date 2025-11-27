@@ -21,14 +21,14 @@ JWT_ACCESS_SECRET=your_access_secret
 JWT_REFRESH_SECRET=your_refresh_secret
 ACCESS_TOKEN_EXPIRES_IN=15m
 REFRESH_TOKEN_EXPIRES_IN=7d
-CLIENT_ORIGINS=https://witnea.onrender.com,http://localhost:5173,http://127.0.0.1:5173
+CLIENT_ORIGIN=https://witnea.onrender.com
 COOKIE_SECURE=false
 BCRYPT_SALT_ROUNDS=10
 ```
 
 ### Frontend `.env` (./frontend/.env)
 ```
-VITE_API_BASE_URL=https://wit-new-1.onrender.com   # override with your backend URL; for local dev set to http://localhost:4000 if you run backend locally
+VITE_API_BASE_URL=https://witback.onrender.com   # override with your backend URL; for local dev set to http://localhost:4000 if you run backend locally
 ```
 
 ## Run with Docker (local)
