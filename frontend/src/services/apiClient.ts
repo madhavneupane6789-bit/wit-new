@@ -1,8 +1,13 @@
 import axios from 'axios';
 
-const baseURL =
-  import.meta.env.VITE_API_BASE_URL ||
-  (import.meta.env.PROD ? 'https://wit-new-1.onrender.com' : 'http://localhost:4000');
+const isProd = import.meta.env.PROD;
+const envBase = import.meta.env.VITE_API_BASE_URL?.trim();
+const defaultProd = 'https://wit-new-1.onrender.com';
+
+// In prod, never use localhost even if misconfigured.
+const baseURL = isProd
+  ? envBase && !envBase.includes('localhost') ? envBase : defaultProd
+  : envBase || 'http://localhost:4000';
 
 const api = axios.create({
   baseURL,
