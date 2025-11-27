@@ -10,7 +10,9 @@ export const env = {
   accessTokenExpiresIn: process.env.ACCESS_TOKEN_EXPIRES_IN || '15m',
   refreshTokenExpiresIn: process.env.REFRESH_TOKEN_EXPIRES_IN || '7d',
   clientOrigin: (process.env.CLIENT_ORIGIN || '').trim(),
-  cookieSecure: process.env.COOKIE_SECURE === 'true',
+  cookieSecure:
+    process.env.COOKIE_SECURE === 'true' ||
+    (!process.env.COOKIE_SECURE && process.env.NODE_ENV === 'production'),
   bcryptSaltRounds: Number(process.env.BCRYPT_SALT_ROUNDS || 10),
   googleServiceEmail: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL || '',
   googleServicePrivateKey: process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY

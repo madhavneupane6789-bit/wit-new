@@ -56,8 +56,8 @@ export async function loginHandler(req: Request, res: Response, next: NextFuncti
 }
 
 export async function logoutHandler(_req: Request, res: Response) {
-  res.clearCookie('accessToken', { path: '/' });
-  res.clearCookie('refreshToken', { path: '/' });
+  res.clearCookie('accessToken', { path: '/', sameSite: 'none', secure: env.cookieSecure });
+  res.clearCookie('refreshToken', { path: '/', sameSite: 'none', secure: env.cookieSecure });
   res.json({ message: 'Logged out' });
 }
 
