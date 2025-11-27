@@ -31,6 +31,14 @@ BCRYPT_SALT_ROUNDS=10
 VITE_API_BASE_URL=https://witback.onrender.com   # override with your backend URL; for local dev set to http://localhost:4000 if you run backend locally
 ```
 
+### SPA routing (Render static site)
+If you deploy the frontend as a Render Static Site, add a rewrite so every path serves `index.html`:
+- Source: `/*`
+- Destination: `/index.html`
+- Type: `rewrite`
+
+You can also use the included `render.yaml` which defines the static site with this rewrite rule.
+
 ## Run with Docker (local)
 ```bash
 docker-compose up --build
