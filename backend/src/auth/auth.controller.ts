@@ -15,6 +15,8 @@ const baseCookieOptions = {
   httpOnly: true,
   secure: env.cookieSecure,
   sameSite: 'none' as const, // required for cross-site cookies
+  // Partitioned cookies allow third-party cookies in modern browsers (e.g., incognito)
+  partitioned: true as const,
   path: '/',
 };
 
