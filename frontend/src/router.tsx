@@ -14,9 +14,9 @@ import { useAuth } from './hooks/useAuth';
 import { Spinner } from './components/UI/Spinner';
 
 const RequireAuth: React.FC<{ children: React.ReactElement; adminOnly?: boolean }> = ({ children, adminOnly }) => {
-  const { user, initialized } = useAuth();
+  const { user, isAuthenticated, initialized, loading } = useAuth();
 
-  if (!initialized) {
+  if (!initialized || loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <Spinner />
@@ -24,7 +24,7 @@ const RequireAuth: React.FC<{ children: React.ReactElement; adminOnly?: boolean 
     );
   }
 
-  if (!user) {
+  if (!isAuthenticated || !user) {
     return <Navigate to="/login" replace />;
   }
 
@@ -36,15 +36,15 @@ const RequireAuth: React.FC<{ children: React.ReactElement; adminOnly?: boolean 
 };
 
 const AuthRedirect: React.FC<{ children: React.ReactElement }> = ({ children }) => {
-  const { user, initialized } = useAuth();
-  if (!initialized) {
+  const { user, isAuthenticated, initialized, loading } = useAuth();
+  if (!initialized || loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <Spinner />
       </div>
     );
   }
-  if (user) {
+  if (isAuthenticated && user) {
     return <Navigate to={user.role === 'ADMIN' ? '/admin' : '/dashboard'} replace />;
   }
   return children;
