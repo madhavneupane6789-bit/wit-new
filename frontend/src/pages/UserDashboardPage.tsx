@@ -258,41 +258,48 @@ const UserDashboardPage: React.FC = () => {
         </Card>
       )}
 
-      {!user?.isApproved && (
+      {user?.status === 'PENDING' && (
         <Card className="mb-6 border-amber-500/50 bg-amber-500/10">
-          <p className="text-sm font-semibold text-amber-300">Content locked</p>
-          <p className="text-sm text-amber-400">Please contact admin to unlock your account.</p>
+          <p className="text-sm font-semibold text-amber-300">Account Pending Activation</p>
+          <p className="text-sm text-amber-400">Your account is awaiting approval from an administrator. All content is temporarily locked.</p>
         </Card>
       )}
-      
-      {renderView()}
+      {user?.status !== 'PENDING' ? (
+        <>
+          {renderView()}
 
-      <div className="mt-6 grid gap-6 md:grid-cols-2">
-        <Card>
-          <p className="text-xs uppercase tracking-[0.22em] text-secondary">Change Password</p>
-          <form className="mt-3 space-y-3" onSubmit={handleChangePassword}>
-            <input
-              className="glass w-full rounded-xl border-transparent bg-black/20 px-3 py-2 text-white shadow-inner focus:border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary"
-              placeholder="Old password"
-              type="password"
-              value={pwdOld}
-              onChange={(e) => setPwdOld(e.target.value)}
-              required
-            />
-            <input
-              className="glass w-full rounded-xl border-transparent bg-black/20 px-3 py-2 text-white shadow-inner focus:border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary"
-              placeholder="New password"
-              type="password"
-              value={pwdNew}
-              onChange={(e) => setPwdNew(e.target.value)}
-              required
-            />
-            <Button type="submit" disabled={!pwdOld || !pwdNew}>
-              Update password
-            </Button>
-          </form>
+          <div className="mt-6 grid gap-6 md:grid-cols-2">
+            <Card>
+              <p className="text-xs uppercase tracking-[0.22em] text-secondary">Change Password</p>
+              <form className="mt-3 space-y-3" onSubmit={handleChangePassword}>
+                <input
+                  className="glass w-full rounded-xl border-transparent bg-black/20 px-3 py-2 text-white shadow-inner focus:border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary"
+                  placeholder="Old password"
+                  type="password"
+                  value={pwdOld}
+                  onChange={(e) => setPwdOld(e.target.value)}
+                  required
+                />
+                <input
+                  className="glass w-full rounded-xl border-transparent bg-black/20 px-3 py-2 text-white shadow-inner focus:border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary"
+                  placeholder="New password"
+                  type="password"
+                  value={pwdNew}
+                  onChange={(e) => setPwdNew(e.target.value)}
+                  required
+                />
+                <Button type="submit" disabled={!pwdOld || !pwdNew}>
+                  Update password
+                </Button>
+              </form>
+            </Card>
+          </div>
+        </>
+      ) : (
+        <Card className="mb-6 border-slate-500/50 bg-slate-500/10 text-center">
+          <p className="text-sm font-semibold text-slate-300">Content and features are unavailable until your account is activated.</p>
         </Card>
-      </div>
+      )}
 
       {playerFile && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 px-4 backdrop-blur-sm">

@@ -11,6 +11,7 @@ import {
 import { validateRequest } from '../middleware/validateRequest';
 import { requireAuth, requireRole } from '../middleware/requireAuth';
 import { requireApproved } from '../middleware/requireApproved';
+import { requireActive } from '../middleware/requireActive'; // Import new middleware
 
 const router = Router();
 
@@ -26,8 +27,8 @@ const idSchema = z.object({
   params: z.object({ id: z.string().uuid() }),
 });
 
-router.get('/files', requireAuth, requireApproved, listFilesHandler);
-router.get('/files/:id', requireAuth, requireApproved, validateRequest(idSchema), getFileHandler);
+router.get('/files', requireAuth, requireApproved, requireActive, listFilesHandler);
+router.get('/files/:id', requireAuth, requireApproved, requireActive, validateRequest(idSchema), getFileHandler);
 
 router.get('/admin/files/all', requireAuth, requireRole('ADMIN'), listAllFilesHandler);
 router.post('/admin/files', requireAuth, requireRole('ADMIN'), validateRequest(z.object({ body: fileBody })), createFileHandler);

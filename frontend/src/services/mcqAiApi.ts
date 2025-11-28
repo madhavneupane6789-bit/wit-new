@@ -1,7 +1,12 @@
-import api from './apiClient';
-import { McqQuestionResponse } from '../../backend/src/mcq-ai/mcq-ai.service'; // Adjust path as needed
+import axios from 'axios';
+import { McqQuestionResponse } from '../pages/MCQAI'; // Assuming type is defined there. Consider moving to a shared types file.
 
-export async function generateAiMcq(topic: string): Promise<McqQuestionResponse> {
-  const res = await api.get<McqQuestionResponse>(`/api/mcq-ai/generate?topic=${encodeURIComponent(topic)}`);
-  return res.data;
+const API_URL = import.meta.env.VITE_API_BASE_URL || '/api';
+
+export async function generateMcqQuestion(topic: string): Promise<McqQuestionResponse> {
+  const response = await axios.get<McqQuestionResponse>(`${API_URL}/mcq-ai/generate`, {
+    params: { topic },
+    withCredentials: true,
+  });
+  return response.data;
 }

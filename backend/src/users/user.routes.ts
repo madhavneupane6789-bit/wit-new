@@ -19,9 +19,19 @@ const createSchema = z.object({
 const updateSchema = z.object({
   params: z.object({ id: z.string().uuid() }),
   body: z.object({
+    name: z.string().min(2).optional(),
+    email: z.string().email().optional(),
     isApproved: z.boolean().optional(),
     isActive: z.boolean().optional(),
     role: z.enum(['USER', 'ADMIN']).optional(),
+    status: z.enum(['PENDING', 'ACTIVE', 'INACTIVE']).optional(),
+    subscriptionStartDate: z.string().datetime().optional().nullable(),
+    subscriptionEndDate: z.string().datetime().optional().nullable(),
+    subscriptionStatus: z.enum(['FREE', 'BASIC', 'PREMIUM']).optional(),
+    phone: z.string().optional(),
+    school: z.string().optional(),
+    preparingFor: z.string().optional(),
+    avatarUrl: z.string().url().optional().nullable(),
   }),
 });
 

@@ -4,6 +4,7 @@ import { createSectionHandler, deleteSectionHandler, getSyllabusTreeHandler, upd
 import { validateRequest } from '../middleware/validateRequest';
 import { requireAuth, requireRole } from '../middleware/requireAuth';
 import { requireApproved } from '../middleware/requireApproved';
+import { requireActive } from '../middleware/requireActive'; // Import new middleware
 
 const router = Router();
 
@@ -36,7 +37,7 @@ const idSchema = z.object({
   params: z.object({ id: z.string().uuid() }),
 });
 
-router.get('/syllabus/tree', requireAuth, requireApproved, getSyllabusTreeHandler);
+router.get('/syllabus/tree', requireAuth, requireApproved, requireActive, getSyllabusTreeHandler);
 
 router.post('/admin/syllabus', requireAuth, requireRole('ADMIN'), validateRequest(createSchema), createSectionHandler);
 router.put('/admin/syllabus/:id', requireAuth, requireRole('ADMIN'), validateRequest(updateSchema), updateSectionHandler);

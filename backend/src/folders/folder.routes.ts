@@ -9,6 +9,7 @@ import {
 import { validateRequest } from '../middleware/validateRequest';
 import { requireAuth, requireRole } from '../middleware/requireAuth';
 import { requireApproved } from '../middleware/requireApproved';
+import { requireActive } from '../middleware/requireActive'; // Import new middleware
 
 const router = Router();
 
@@ -36,7 +37,7 @@ const idSchema = z.object({
   params: z.object({ id: z.string().uuid() }),
 });
 
-router.get('/folders/tree', requireAuth, requireApproved, getFolderTreeHandler);
+router.get('/folders/tree', requireAuth, requireApproved, requireActive, getFolderTreeHandler);
 
 router.get('/admin/folders/tree', requireAuth, requireRole('ADMIN'), getFolderTreeHandler);
 router.post('/admin/folders', requireAuth, requireRole('ADMIN'), validateRequest(createSchema), createFolderHandler);

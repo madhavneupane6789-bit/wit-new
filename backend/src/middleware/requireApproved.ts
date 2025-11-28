@@ -6,15 +6,31 @@ export async function requireApproved(req: Request, _res: Response, next: NextFu
   if (!req.user) {
     return next(new AppError(401, 'Unauthorized'));
   }
+
+  // Admin users should always pass this check
+  if (req.user.role === 'ADMIN') {
+    return next();
+  }
+
+  // For non-admin users, we will fetch their latest approval status
   const user = await prisma.user.findUnique({
     where: { id: req.user.id },
-    select: { isApproved: true, isActive: true },
+    select: { isApproved: true, isActive: true, status: true }, // Select status as well for consistency
   });
-  if (!user || !user.isActive) {
-    return next(new AppError(403, 'Your account is inactive. Contact admin to unlock.'));
+
+  // Attach the actual approval status to req.user for frontend to use.
+  // The frontend will use this to determine content access for PENDING users.
+  // The 'requireActive' middleware already handles genuinely inactive accounts.
+  if (user) {
+    req.user.isApproved = user.isApproved;
+    // Also update isActive, as the default type definition might not reflect the actual DB value if changed
+    req.user.isActive = user.isActive; 
+  } else {
+    // This case should ideally not be reached if requireAuth runs before, but for safety
+    req.user.isApproved = false;
+    req.user.isActive = false;
   }
-  if (!user.isApproved) {
-    return next(new AppError(403, 'Contact admin to unlock content.'));
-  }
+
+
   next();
 }

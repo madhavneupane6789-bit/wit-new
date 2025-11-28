@@ -4,6 +4,7 @@ import { listQuestionsHandler, createQuestionHandler, answerQuestionHandler, del
 import { validateRequest } from '../middleware/validateRequest';
 import { requireAuth, requireRole } from '../middleware/requireAuth';
 import { requireApproved } from '../middleware/requireApproved';
+import { requireActive } from '../middleware/requireActive'; // Import new middleware
 
 const router = Router();
 
@@ -32,8 +33,8 @@ const idSchema = z.object({
   }),
 });
 
-router.get('/mcq', requireAuth, requireApproved, listQuestionsHandler);
-router.post('/mcq/answer', requireAuth, requireApproved, validateRequest(answerSchema), answerQuestionHandler);
+router.get('/mcq', requireAuth, requireApproved, requireActive, listQuestionsHandler);
+router.post('/mcq/answer', requireAuth, requireApproved, requireActive, validateRequest(answerSchema), answerQuestionHandler);
 
 router.post('/admin/mcq', requireAuth, requireRole('ADMIN'), validateRequest(createSchema), createQuestionHandler);
 router.delete('/admin/mcq/:id', requireAuth, requireRole('ADMIN'), validateRequest(idSchema), deleteQuestionHandler);

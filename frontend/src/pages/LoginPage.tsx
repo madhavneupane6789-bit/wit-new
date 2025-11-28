@@ -57,6 +57,9 @@ const LoginPage: React.FC = () => {
         <Button type="submit" className="w-full" disabled={loading}>
           {loading ? 'Signing in...' : 'Login'}
         </Button>
+        <p className="text-xs text-gray-400 mt-4 text-center">
+          Experiencing login issues? Please ensure third-party cookies are enabled in your browser for seamless authentication.
+        </p>
       </form>
     </AuthLayout>
   );

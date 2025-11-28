@@ -68,6 +68,26 @@ export const UserEditModal: React.FC<UserEditModalProps> = ({ user, isOpen, onCl
             <option value="ADMIN">ADMIN</option>
           </select>
         </div>
+        <div className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            name="isApproved"
+            checked={!!formData.isApproved}
+            onChange={(e) => setFormData((prev) => ({ ...prev, isApproved: e.target.checked }))}
+            className="form-checkbox h-4 w-4 text-primary rounded border-gray-300"
+          />
+          <label className="text-sm font-medium text-slate-300">Is Approved</label>
+        </div>
+        <div className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            name="isActive"
+            checked={!!formData.isActive}
+            onChange={(e) => setFormData((prev) => ({ ...prev, isActive: e.target.checked }))}
+            className="form-checkbox h-4 w-4 text-primary rounded border-gray-300"
+          />
+          <label className="text-sm font-medium text-slate-300">Is Active</label>
+        </div>
         <div>
           <label className="block text-sm font-medium text-slate-300">Subscription Start Date</label>
           <input

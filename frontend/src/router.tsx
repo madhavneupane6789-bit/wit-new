@@ -10,8 +10,8 @@ import AdminDashboardPage from './pages/AdminDashboardPage';
 import SyllabusPage from './pages/SyllabusPage';
 import SyllabusFullPage from './pages/SyllabusFullPage';
 import MCQPracticePage from './pages/MCQPracticePage';
-import MCQAI from './pages/MCQAI'; // Import new page
-import AccountPendingPage from './pages/AccountPendingPage'; // Import new page
+import MCQAI from './pages/MCQAI';
+// import AccountPendingPage from './pages/AccountPendingPage'; // No longer directly redirected here
 import { useAuth } from './hooks/useAuth';
 import { LoadingScreen } from './components/UI/LoadingScreen';
 
@@ -26,10 +26,8 @@ const RequireAuth: React.FC<{ children: React.ReactElement; adminOnly?: boolean 
     return <Navigate to="/login" replace />;
   }
 
-  // Check user status
-  if (user.status === 'PENDING') {
-    return <Navigate to="/account-pending" replace />;
-  }
+  // PENDING status check is removed here, allowing them to access the dashboard.
+  // Content blocking will be handled within the components.
 
   if (adminOnly && user.role !== 'ADMIN') {
     return <Navigate to="/dashboard" replace />;
@@ -43,7 +41,8 @@ const AuthRedirect: React.FC<{ children: React.ReactElement }> = ({ children }) 
   if (!initialized || loading) {
     return <LoadingScreen />;
   }
-  if (isAuthenticated && user && user.status !== 'PENDING') { // Only redirect if not pending
+  // Only redirect if authenticated and not ADMIN, and status is not PENDING
+  if (isAuthenticated && user) {
     return <Navigate to={user.role === 'ADMIN' ? '/admin' : '/dashboard'} replace />;
   }
   return children;
@@ -71,10 +70,11 @@ const AppRouter: React.FC = () => (
       />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
-      <Route
+      {/* The AccountPendingPage route is removed as redirection is no longer handled in RequireAuth */}
+      {/* <Route
         path="/account-pending"
         element={<AccountPendingPage />}
-      />
+      /> */}
       <Route
         path="/dashboard"
         element={
