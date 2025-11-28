@@ -7,7 +7,7 @@ type CardProps = {
 };
 
 export const Card: React.FC<CardProps> = ({ children, className }) => (
-  <div className={clsx('glass rounded-2xl p-6 shadow-glow', className)}>
+  <div className={clsx('glass glass-3d rounded-2xl p-6 shadow-glow', className)}>
     {children}
   </div>
 );

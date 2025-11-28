@@ -24,10 +24,7 @@ export async function requireAuth(req: Request, _res: Response, next: NextFuncti
       throw new AppError(401, 'Unauthorized');
     }
 
-    if (user.role !== 'ADMIN' && user.status !== 'ACTIVE') {
-      throw new AppError(403, 'Account not approved yet. Please wait for admin approval.');
-    }
-
+    // Allow all users to log in and reach protected views; downstream routes can enforce stricter checks if needed.
     req.user = { id: user.id, role: user.role };
     next();
   } catch (err) {
