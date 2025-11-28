@@ -12,7 +12,19 @@ type AuthTokens = {
 };
 
 function toPublicUser(
-  user: Prisma.UserGetPayload<{ select: { id: true; name: true; email: true; role: true; isApproved: true; isActive: true } }>,
+  user: Prisma.UserGetPayload<{
+    select: {
+      id: true;
+      name: true;
+      email: true;
+      role: true;
+      status: true;
+      subscriptionStartDate: true;
+      subscriptionEndDate: true;
+      subscriptionStatus: true;
+      lastLoginDate: true;
+    };
+  }>,
 ) {
   return user;
 }
@@ -45,12 +57,16 @@ export async function registerUser(params: {
       email: params.email,
       passwordHash,
       role: Role.USER,
+      status: 'PENDING', // Default status for new users
+      subscriptionStatus: 'FREE', // Default subscription status
+      subscriptionStartDate: new Date(),
+      subscriptionEndDate: new Date(new Date().setMonth(new Date().getMonth() + 1)), // 1 month free trial
       phone: params.phone,
       school: params.school,
       preparingFor: params.preparingFor,
       avatarUrl: params.avatarUrl,
     },
-    select: { id: true, name: true, email: true, role: true, isApproved: true, isActive: true, avatarUrl: true },
+    select: { id: true, name: true, email: true, role: true, status: true, subscriptionStartDate: true, subscriptionEndDate: true, subscriptionStatus: true, lastLoginDate: true, avatarUrl: true },
   });
 
   const tokens = issueTokens(user);
@@ -60,7 +76,18 @@ export async function registerUser(params: {
 export async function loginUser(params: { email: string; password: string }) {
   const user = await prisma.user.findUnique({
     where: { email: params.email },
-    select: { id: true, name: true, email: true, role: true, passwordHash: true, isApproved: true, isActive: true },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      passwordHash: true,
+      status: true,
+      subscriptionStartDate: true,
+      subscriptionEndDate: true,
+      subscriptionStatus: true,
+      lastLoginDate: true,
+    },
   });
 
   if (!user) {
@@ -72,6 +99,20 @@ export async function loginUser(params: { email: string; password: string }) {
     throw new AppError(400, 'Invalid credentials');
   }
 
+  if (user.status === 'PENDING') {
+    throw new AppError(403, 'Your account is pending activation. Please wait for an administrator to approve it.');
+  }
+
+  if (user.status === 'INACTIVE') {
+    throw new AppError(403, 'Your account is inactive. Please contact support.');
+  }
+
+  // Update lastLoginDate
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { lastLoginDate: new Date() },
+  });
+
   const tokens = issueTokens({ id: user.id, role: user.role });
   return {
     user: toPublicUser({
@@ -79,8 +120,11 @@ export async function loginUser(params: { email: string; password: string }) {
       name: user.name,
       email: user.email,
       role: user.role,
-      isApproved: user.isApproved,
-      isActive: user.isActive,
+      status: user.status,
+      subscriptionStartDate: user.subscriptionStartDate,
+      subscriptionEndDate: user.subscriptionEndDate,
+      subscriptionStatus: user.subscriptionStatus,
+      lastLoginDate: new Date(), // Return the updated lastLoginDate
     }),
     tokens,
   };
@@ -100,7 +144,17 @@ export async function refreshSession(refreshToken: string | undefined) {
 
   const user = await prisma.user.findUnique({
     where: { id: payload.userId },
-    select: { id: true, name: true, email: true, role: true, isApproved: true, isActive: true },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      status: true,
+      subscriptionStartDate: true,
+      subscriptionEndDate: true,
+      subscriptionStatus: true,
+      lastLoginDate: true,
+    },
   });
 
   if (!user) {
@@ -114,7 +168,21 @@ export async function refreshSession(refreshToken: string | undefined) {
 export async function getCurrentUser(userId: string) {
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: { id: true, name: true, email: true, role: true, isApproved: true, isActive: true, avatarUrl: true, phone: true, school: true, preparingFor: true },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      status: true,
+      subscriptionStartDate: true,
+      subscriptionEndDate: true,
+      subscriptionStatus: true,
+      lastLoginDate: true,
+      avatarUrl: true,
+      phone: true,
+      school: true,
+      preparingFor: true,
+    },
   });
   if (!user) {
     throw new AppError(404, 'User not found');

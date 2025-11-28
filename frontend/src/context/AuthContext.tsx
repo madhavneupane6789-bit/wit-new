@@ -11,6 +11,8 @@ type AuthContextType = {
   register: (name: string, email: string, password: string) => Promise<User>;
   logout: () => Promise<void>;
   refresh: () => Promise<User | null>;
+  showCookieMessage: boolean;
+  dismissCookieMessage: () => void;
 };
 
 export const AuthContext = createContext<AuthContextType>({
@@ -28,6 +30,8 @@ export const AuthContext = createContext<AuthContextType>({
   refresh: async () => {
     return null;
   },
+  showCookieMessage: false,
+  dismissCookieMessage: () => {},
 });
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -35,6 +39,42 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(false);
   const [initialized, setInitialized] = useState(false);
+  const [showCookieMessage, setShowCookieMessage] = useState(false);
+
+  const COOKIE_MESSAGE_DISMISSED_KEY = 'cookieMessageDismissed';
+  const COOKIE_MESSAGE_TIMEOUT_MS = 1000 * 60 * 60 * 24 * 7; // 7 days
+
+  const dismissCookieMessage = () => {
+    localStorage.setItem(COOKIE_MESSAGE_DISMISSED_KEY, Date.now().toString());
+    setShowCookieMessage(false);
+  };
+
+  const checkCookieMessage = (currentUser: User | null) => {
+    if (!currentUser) {
+      setShowCookieMessage(false);
+      return;
+    }
+
+    const dismissedTimestamp = localStorage.getItem(COOKIE_MESSAGE_DISMISSED_KEY);
+    if (dismissedTimestamp) {
+      const timeSinceDismissed = Date.now() - parseInt(dismissedTimestamp, 10);
+      if (timeSinceDismissed < COOKIE_MESSAGE_TIMEOUT_MS) {
+        setShowCookieMessage(false);
+        return;
+      }
+    }
+
+    // Show if lastLoginDate is null (first login) or if it's been more than a day
+    const oneDay = 1000 * 60 * 60 * 24;
+    const lastLogin = currentUser.lastLoginDate ? new Date(currentUser.lastLoginDate).getTime() : 0;
+    const timeSinceLastLogin = Date.now() - lastLogin;
+
+    if (!currentUser.lastLoginDate || timeSinceLastLogin > oneDay) {
+      setShowCookieMessage(true);
+    } else {
+      setShowCookieMessage(false);
+    }
+  };
 
   const refresh = async () => {
     setLoading(true);
@@ -42,10 +82,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const me = await authApi.refresh();
       setUser(me);
       setIsAuthenticated(true);
+      checkCookieMessage(me);
       return me;
     } catch {
       setUser(null);
       setIsAuthenticated(false);
+      setShowCookieMessage(false);
       return null;
     } finally {
       setLoading(false);
@@ -59,6 +101,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const me = await authApi.me();
       setUser(me);
       setIsAuthenticated(true);
+      checkCookieMessage(me);
     } catch {
       // attempt refresh if /me fails (e.g., access token expired)
       try {
@@ -72,6 +115,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
       setUser(null);
       setIsAuthenticated(false);
+      setShowCookieMessage(false);
     } finally {
       setInitialized(true);
       setLoading(false);
@@ -88,6 +132,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const me = await authApi.login({ email, password });
       setUser(me);
       setIsAuthenticated(true);
+      checkCookieMessage(me);
       return me;
     } finally {
       setLoading(false);
@@ -100,6 +145,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const me = await authApi.register({ name, email, password });
       setUser(me);
       setIsAuthenticated(true);
+      checkCookieMessage(me);
       return me;
     } finally {
       setLoading(false);
@@ -112,6 +158,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await authApi.logout();
       setUser(null);
       setIsAuthenticated(false);
+      setShowCookieMessage(false);
     } finally {
       setLoading(false);
     }
@@ -119,7 +166,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   return (
     <AuthContext.Provider
-      value={{ user, isAuthenticated, loading, initialized, login, register, logout, refresh }}
+      value={{ user, isAuthenticated, loading, initialized, login, register, logout, refresh, showCookieMessage, dismissCookieMessage }}
     >
       {children}
     </AuthContext.Provider>

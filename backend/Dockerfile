@@ -2,13 +2,17 @@ FROM node:18-alpine AS builder
 WORKDIR /app
 RUN apk add --no-cache openssl
 # Provide a default DATABASE_URL for build-time Prisma generate
-ARG DATABASE_URL=postgresql://edu_user:edu_password@db:5432/edu_platform?schema=public
+# This is crucial for `prisma generate` to connect to a database to introspect schema if needed,
+# though it primarily uses the local schema file.
+ARG DATABASE_URL="postgresql://edu_user:edu_password@db:5432/edu_platform?schema=public"
 ENV DATABASE_URL=${DATABASE_URL}
 COPY prisma ./prisma
 COPY package*.json ./
+# Install backend dependencies, including any new ones like @google/generative-ai
 RUN npm install
 COPY tsconfig.json ./
 COPY src ./src
+# Generate Prisma client based on the schema, including any new models or fields
 RUN npm run prisma:generate
 RUN npm run build
 

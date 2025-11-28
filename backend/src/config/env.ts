@@ -26,4 +26,5 @@ export const env = {
   googleServicePrivateKey: process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY
     ? process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY.replace(/\\n/g, '\n')
     : '',
+  geminiApiKey: process.env.GEMINI_API_KEY || '',
 };

@@ -47,12 +47,21 @@ export async function listUsers() {
   return res.data.users;
 }
 
-export async function createUser(payload: { name: string; email: string; password: string; role?: 'USER' | 'ADMIN'; isApproved?: boolean }) {
+export async function createUser(payload: { name: string; email: string; password: string; role?: 'USER' | 'ADMIN' }) {
   const res = await api.post<{ user: User }>('/api/admin/users', payload);
   return res.data.user;
 }
 
-export async function updateUser(id: string, payload: Partial<{ isApproved: boolean; isActive: boolean; role: 'USER' | 'ADMIN' }>) {
+export async function updateUser(
+  id: string,
+  payload: Partial<{
+    status: 'PENDING' | 'ACTIVE' | 'INACTIVE';
+    subscriptionStartDate: Date;
+    subscriptionEndDate: Date;
+    subscriptionStatus: 'FREE' | 'BASIC' | 'PREMIUM';
+    role: 'USER' | 'ADMIN';
+  }>,
+) {
   const res = await api.patch<{ user: User }>(`/api/admin/users/${id}`, payload);
   return res.data.user;
 }

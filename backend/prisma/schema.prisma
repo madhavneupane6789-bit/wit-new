@@ -12,6 +12,18 @@ enum Role {
   ADMIN
 }
 
+enum UserStatus {
+  PENDING
+  ACTIVE
+  INACTIVE
+}
+
+enum SubscriptionStatus {
+  FREE
+  BASIC
+  PREMIUM
+}
+
 enum FileType {
   VIDEO
   PDF
@@ -25,24 +37,29 @@ enum MCQOption {
 }
 
 model User {
-  id             String   @id @default(uuid())
-  name           String
-  email          String   @unique
-  passwordHash   String
-  role           Role     @default(USER)
-  isApproved     Boolean  @default(false)
-  isActive       Boolean  @default(true)
-  phone          String?
-  school         String?
-  preparingFor   String?
-  avatarUrl      String?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-  resetTokens    PasswordResetToken[]
-  files          File[]
-  folders        Folder[] @relation("FolderCreatedBy")
-  bookmarks      Bookmark[]
-  progress       FileProgress[]
+  id                String   @id @default(uuid())
+  name              String
+  email             String   @unique
+  passwordHash      String
+  role              Role     @default(USER)
+  isApproved        Boolean  @default(false)
+  isActive          Boolean  @default(true)
+  status            UserStatus @default(PENDING)
+  subscriptionStartDate DateTime?
+  subscriptionEndDate   DateTime?
+  subscriptionStatus  SubscriptionStatus @default(FREE)
+  lastLoginDate     DateTime?
+  phone             String?
+  school            String?
+  preparingFor      String?
+  avatarUrl         String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  resetTokens       PasswordResetToken[]
+  files             File[]
+  folders           Folder[] @relation("FolderCreatedBy")
+  bookmarks         Bookmark[]
+  progress          FileProgress[]
 }
 
 model PasswordResetToken {

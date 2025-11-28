@@ -5,8 +5,11 @@ export type User = {
   name: string;
   email: string;
   role: 'USER' | 'ADMIN';
-  isApproved: boolean;
-  isActive: boolean;
+  status: 'PENDING' | 'ACTIVE' | 'INACTIVE';
+  subscriptionStartDate?: string | null;
+  subscriptionEndDate?: string | null;
+  subscriptionStatus: 'FREE' | 'BASIC' | 'PREMIUM';
+  lastLoginDate?: string | null;
   phone?: string | null;
   school?: string | null;
   preparingFor?: string | null;

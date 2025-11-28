@@ -11,6 +11,7 @@ import {
 } from '../../services/adminApi';
 import { changePassword } from '../../services/authApi';
 import { User } from '../../services/authApi';
+import { UserEditModal } from './UserEditModal'; // Import the new modal
 
 export const UserManagement: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
@@ -20,6 +21,8 @@ export const UserManagement: React.FC = () => {
   const [pwdOld, setPwdOld] = useState('');
   const [pwdNew, setPwdNew] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [editingUser, setEditingUser] = useState<User | null>(null); // State for user being edited
+  const [isModalOpen, setIsModalOpen] = useState(false); // State for modal visibility
 
   const loadUsers = async () => {
     try {
@@ -39,30 +42,11 @@ export const UserManagement: React.FC = () => {
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await adminCreateUser({ ...userForm, isApproved: true });
+      await adminCreateUser(userForm);
       setUserForm({ name: '', email: '', password: '', role: 'USER' });
       loadUsers();
     } catch (err: any) {
       setError(err.message || 'User create failed');
-    }
-  };
-
-  const toggleApproval = async (u: User) => {
-    try {
-      await adminUpdateUser(u.id, { isApproved: !u.isApproved });
-      loadUsers();
-    } catch (err: any) {
-      setError(err.message || 'Update failed');
-    }
-  };
-
-  const deactivateUser = async (u: User) => {
-    if (!confirm('Deactivate user?')) return;
-    try {
-      await adminUpdateUser(u.id, { isActive: !u.isActive });
-      loadUsers();
-    } catch (err: any) {
-      setError(err.message || 'Update failed');
     }
   };
 
@@ -101,6 +85,32 @@ export const UserManagement: React.FC = () => {
       setError(err.message || 'Stats fetch failed');
     }
   };
+
+  const handleManageUser = (user: User) => {
+    setEditingUser(user);
+    setIsModalOpen(true);
+  };
+
+  const handleUpdateUser = async (userId: string, data: Partial<User>) => {
+    try {
+      // Convert Date objects to string for API
+      const payload: any = { ...data };
+      if (payload.subscriptionStartDate instanceof Date) {
+        payload.subscriptionStartDate = payload.subscriptionStartDate.toISOString();
+      }
+      if (payload.subscriptionEndDate instanceof Date) {
+        payload.subscriptionEndDate = payload.subscriptionEndDate.toISOString();
+      }
+
+      await adminUpdateUser(userId, payload);
+      loadUsers(); // Reload users to reflect changes
+      setIsModalOpen(false);
+      setEditingUser(null);
+    } catch (err: any) {
+      setError(err.message || 'Failed to update user');
+    }
+  };
+
 
   return (
     <div className="space-y-6">
@@ -177,17 +187,16 @@ export const UserManagement: React.FC = () => {
                 <p className="text-sm font-semibold text-white">
                   {u.name} <span className="text-xs text-slate-400">({u.role})</span>
                 </p>
-                <p className="text-xs text-slate-400">{u.email}</p>
+                <p className="text-xs text-slate-400">
+                  {u.email} - Status: {u.status} - Sub: {u.subscriptionStatus}
+                </p>
               </div>
               <div className="flex gap-2">
                 <Button variant="ghost" onClick={() => viewUserStats(u)}>
                   Stats
                 </Button>
-                <Button variant="ghost" onClick={() => toggleApproval(u)}>
-                  {u.isApproved ? 'Revoke' : 'Approve'}
-                </Button>
-                <Button variant="ghost" onClick={() => deactivateUser(u)}>
-                  {u.isActive ? 'Deactivate' : 'Activate'}
+                <Button variant="ghost" onClick={() => handleManageUser(u)}>
+                  Manage
                 </Button>
                 <Button variant="danger" onClick={() => removeUser(u)}>
                   Delete
@@ -224,6 +233,14 @@ export const UserManagement: React.FC = () => {
           </div>
         </div>
       </Card>
+      {editingUser && (
+        <UserEditModal
+          user={editingUser}
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          onSave={handleUpdateUser}
+        />
+      )}
     </div>
   );
 };

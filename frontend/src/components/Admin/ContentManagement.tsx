@@ -255,16 +255,11 @@ export const ContentManagement: React.FC = () => {
           <p className="text-sm text-white/80">Drag to reorder folders/files. Order is respected over names.</p>
         </Card>
         <Card>
-          <p className="text-xs uppercase tracking-[0.22em] text-secondary">Actions</p>
-          <div className="mt-3 flex flex-wrap gap-2">
-            <Button onClick={openCreateFolder}>Add Folder</Button>
-            <Button variant="ghost" onClick={openCreateFile}>
-              Add File
-            </Button>
-            <Button variant="ghost" onClick={loadContent}>
-              Refresh
-            </Button>
-          </div>
+          <p className="text-xs uppercase tracking-[0.22em] text-secondary">AI MCQ Feature</p>
+          <h3 className="mt-2 text-xl font-semibold text-white">Gemini API Integration</h3>
+          <p className="text-sm text-slate-300">
+            AI-powered MCQ generation is enabled. Configure `GEMINI_API_KEY` in the backend's `.env` file for functionality.
+          </p>
         </Card>
       </div>
 
