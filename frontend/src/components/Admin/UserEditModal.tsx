@@ -18,6 +18,8 @@ export const UserEditModal: React.FC<UserEditModalProps> = ({ user, isOpen, onCl
       setFormData({
         status: user.status,
         role: user.role,
+        isApproved: user.isApproved,
+        isActive: user.isActive,
         subscriptionStartDate: user.subscriptionStartDate,
         subscriptionEndDate: user.subscriptionEndDate,
         subscriptionStatus: user.subscriptionStatus,

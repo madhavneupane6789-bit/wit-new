@@ -188,7 +188,7 @@ export const UserManagement: React.FC = () => {
                   {u.name} <span className="text-xs text-slate-400">({u.role})</span>
                 </p>
                 <p className="text-xs text-slate-400">
-                  {u.email} - Status: {u.status} - Sub: {u.subscriptionStatus}
+                  {u.email} - Status: {u.status} - Approved: {u.isApproved ? 'Yes' : 'No'} - Active: {u.isActive ? 'Yes' : 'No'} - Sub: {u.subscriptionStatus}
                 </p>
               </div>
               <div className="flex gap-2">

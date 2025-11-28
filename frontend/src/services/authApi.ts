@@ -6,6 +6,8 @@ export type User = {
   email: string;
   role: 'USER' | 'ADMIN';
   status: 'PENDING' | 'ACTIVE' | 'INACTIVE';
+  isApproved?: boolean;
+  isActive?: boolean;
   subscriptionStartDate?: string | null;
   subscriptionEndDate?: string | null;
   subscriptionStatus: 'FREE' | 'BASIC' | 'PREMIUM';

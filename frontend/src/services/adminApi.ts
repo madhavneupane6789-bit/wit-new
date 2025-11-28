@@ -55,11 +55,19 @@ export async function createUser(payload: { name: string; email: string; passwor
 export async function updateUser(
   id: string,
   payload: Partial<{
+    name: string;
+    email: string;
     status: 'PENDING' | 'ACTIVE' | 'INACTIVE';
+    isApproved: boolean;
+    isActive: boolean;
     subscriptionStartDate: Date;
     subscriptionEndDate: Date;
     subscriptionStatus: 'FREE' | 'BASIC' | 'PREMIUM';
     role: 'USER' | 'ADMIN';
+    phone: string;
+    school: string;
+    preparingFor: string;
+    avatarUrl: string | null;
   }>,
 ) {
   const res = await api.patch<{ user: User }>(`/api/admin/users/${id}`, payload);
