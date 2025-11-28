@@ -16,7 +16,16 @@ export async function requireAuth(req: Request, _res: Response, next: NextFuncti
     const payload = verifyAccessToken(token);
     const user = await prisma.user.findUnique({
       where: { id: payload.userId },
-      select: { id: true, role: true, status: true },
+      select: {
+        id: true,
+        email: true,
+        role: true,
+        status: true,
+        isApproved: true,
+        isActive: true,
+        subscriptionEndDate: true,
+        subscriptionStatus: true,
+      },
     });
 
     if (!user) {
@@ -24,8 +33,17 @@ export async function requireAuth(req: Request, _res: Response, next: NextFuncti
       throw new AppError(401, 'Unauthorized');
     }
 
-    // Allow all users to log in and reach protected views; downstream routes can enforce stricter checks if needed.
-    req.user = { id: user.id, role: user.role };
+    // Attach full user context; downstream middlewares can apply stricter rules.
+    req.user = {
+      id: user.id,
+      email: user.email,
+      role: user.role,
+      status: user.status,
+      isApproved: user.isApproved,
+      isActive: user.isActive,
+      subscriptionEndDate: user.subscriptionEndDate ?? undefined,
+      subscriptionStatus: user.subscriptionStatus,
+    };
     next();
   } catch (err) {
     console.warn('requireAuth: token verification failed');

@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { generateMcqHandler } from './mcq-ai.controller';
+import { generateMcqQuestionHandler } from './mcq-ai.controller';
 import { requireAuth } from '../middleware/requireAuth';
 import { requireApproved } from '../middleware/requireApproved';
 import { requireActive } from '../middleware/requireActive'; // Import new middleware
