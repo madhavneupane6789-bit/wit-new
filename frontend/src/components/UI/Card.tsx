@@ -7,12 +7,7 @@ type CardProps = {
 };
 
 export const Card: React.FC<CardProps> = ({ children, className }) => (
-  <div
-    className={clsx(
-      'glass rounded-2xl border border-white/50 p-6 shadow-glow transition duration-200 hover:-translate-y-0.5 hover:shadow-lg',
-      className,
-    )}
-  >
+  <div className={clsx('glass rounded-2xl p-6 shadow-glow', className)}>
     {children}
   </div>
 );

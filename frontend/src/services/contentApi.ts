@@ -146,3 +146,8 @@ export async function uploadMedia(file: File, label?: string) {
   const res = await api.post('/api/admin/upload/media', form, { headers: { 'Content-Type': 'multipart/form-data' } });
   return res.data.asset as { id: string; url: string; label?: string };
 }
+
+export async function fetchAllFiles() {
+  const res = await api.get('/api/admin/files/all');
+  return res.data.files as (FileItem & { folder: { name: string } | null })[];
+}

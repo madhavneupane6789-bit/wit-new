@@ -30,21 +30,21 @@ const ForgotPasswordPage: React.FC = () => {
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">
-          <label className="text-sm font-semibold text-midnight">Email</label>
+          <label className="text-sm font-semibold text-slate-300">Email</label>
           <input
-            className="w-full rounded-xl border border-slate-200 bg-white/80 px-3 py-2 text-midnight shadow-inner focus:border-blue-400 focus:outline-none"
+            className="glass w-full rounded-xl border-transparent bg-black/20 px-3 py-2 text-white shadow-inner focus:border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
           />
         </div>
-        {message && <p className="text-sm text-blue-600">{message}</p>}
+        {message && <p className="text-sm text-primary">{message}</p>}
         <Button type="submit" className="w-full" disabled={loading}>
           {loading ? 'Sending...' : 'Send reset link'}
         </Button>
         <div className="text-sm">
-          <Link to="/login" className="font-semibold text-blue-600 hover:underline">
+          <Link to="/login" className="font-semibold text-primary hover:underline">
             Back to login
           </Link>
         </div>

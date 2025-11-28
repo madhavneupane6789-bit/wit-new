@@ -1,5 +1,14 @@
 import { NextFunction, Request, Response } from 'express';
-import { createFile, deleteFile, getFileById, listFilesTree, updateFile } from './file.service';
+import { createFile, deleteFile, getFileById, listAllFiles, listFilesTree, updateFile } from './file.service';
+
+export async function listAllFilesHandler(_req: Request, res: Response, next: NextFunction) {
+  try {
+    const files = await listAllFiles();
+    res.json({ files });
+  } catch (err) {
+    next(err);
+  }
+}
 
 export async function listFilesHandler(_req: Request, res: Response, next: NextFunction) {
   try {

@@ -26,9 +26,9 @@ const LoginPage: React.FC = () => {
     <AuthLayout title="Welcome back" subtitle="Access your learning hub with one click.">
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">
-          <label className="text-sm font-semibold text-midnight">Email</label>
+          <label className="text-sm font-semibold text-slate-300">Email</label>
           <input
-            className="w-full rounded-xl border border-slate-200 bg-white/80 px-3 py-2 text-midnight shadow-inner focus:border-blue-400 focus:outline-none"
+            className="glass w-full rounded-xl border-transparent bg-black/20 px-3 py-2 text-white shadow-inner focus:border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -36,9 +36,9 @@ const LoginPage: React.FC = () => {
           />
         </div>
         <div className="space-y-2">
-          <label className="text-sm font-semibold text-midnight">Password</label>
+          <label className="text-sm font-semibold text-slate-300">Password</label>
           <input
-            className="w-full rounded-xl border border-slate-200 bg-white/80 px-3 py-2 text-midnight shadow-inner focus:border-blue-400 focus:outline-none"
+            className="glass w-full rounded-xl border-transparent bg-black/20 px-3 py-2 text-white shadow-inner focus:border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary"
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -46,10 +46,10 @@ const LoginPage: React.FC = () => {
           />
         </div>
         <div className="flex items-center justify-between text-sm">
-          <Link to="/forgot-password" className="font-semibold text-blue-600 hover:underline">
+          <Link to="/forgot-password" className="font-semibold text-primary hover:underline">
             Forgot your password?
           </Link>
-          <Link to="/register" className="text-slate-500 hover:text-slate-700">
+          <Link to="/register" className="text-slate-400 hover:text-slate-200">
             Create account
           </Link>
         </div>

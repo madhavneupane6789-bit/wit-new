@@ -1,6 +1,9 @@
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
+import helmet from 'helmet';
+import morgan from 'morgan';
+import rateLimit from 'express-rate-limit';
 import authRoutes from './auth/auth.routes';
 import folderRoutes from './folders/folder.routes';
 import fileRoutes from './files/file.routes';
@@ -18,12 +21,28 @@ import { errorHandler } from './middleware/errorHandler';
 
 const app = express();
 
+// Security Middleware
+app.use(helmet());
 app.use(
   cors({
     origin: env.clientOrigin || 'https://witnea.onrender.com',
     credentials: true,
   }),
 );
+
+// Logging Middleware
+app.use(morgan('dev'));
+
+// Rate Limiting
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+app.use('/api/', apiLimiter);
+
+
 app.use(express.json());
 app.use(cookieParser());
 app.use('/uploads', express.static('uploads'));

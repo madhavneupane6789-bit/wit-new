@@ -84,3 +84,10 @@ export async function getFileById(id: string) {
 export async function listFilesTree(userId?: string) {
   return getFolderTree(userId);
 }
+
+export async function listAllFiles() {
+  return prisma.file.findMany({
+    orderBy: { createdAt: 'desc' },
+    include: { folder: true },
+  });
+}

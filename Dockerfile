@@ -27,6 +27,6 @@ COPY backend/prisma ./prisma
 COPY backend/start.sh ./start.sh
 
 RUN chmod +x start.sh
-EXPOSE 4000
+
 
 CMD ["./start.sh"]

@@ -14,7 +14,7 @@ if [ -z "$DATABASE_URL" ]; then
 fi
 
 echo "Waiting for database to be ready..."
-until npx prisma db push; do
+until npx prisma migrate deploy; do
   echo "Database not ready, retrying in 3 seconds..."
   sleep 3
 done

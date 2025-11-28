@@ -12,11 +12,18 @@ export class AppError extends Error {
 }
 
 export function errorHandler(err: Error, _req: Request, res: Response, _next: NextFunction) {
-  const status = (err as AppError).status || 500;
-  const message = err.message || 'Internal server error';
-  const details = (err as AppError).details;
+  let status = (err as AppError).status || 500;
+  let message = err.message || 'Internal server error';
+  let details = (err as AppError).details;
 
   console.error(err);
+
+  if (process.env.NODE_ENV === 'production' && status >= 500) {
+    status = 500;
+    message = 'Internal server error';
+    details = undefined;
+  }
+
   res.status(status).json({
     error: {
       message,

@@ -1,6 +1,47 @@
 import api from './apiClient';
 import { User } from './authApi';
 
+export const FileType = {
+  VIDEO: 'VIDEO',
+  PDF: 'PDF',
+} as const;
+
+export type FileType = (typeof FileType)[keyof typeof FileType];
+
+export interface File {
+  id: string;
+  name: string;
+  description: string | null;
+  fileType: FileType;
+  googleDriveUrl: string;
+  folderId: string | null;
+  createdAt: string;
+  updatedAt: string;
+  folder: {
+    id: string;
+    name: string;
+  } | null;
+}
+
+export async function listAllFiles() {
+  const res = await api.get<{ files: File[] }>('/api/admin/files/all');
+  return res.data.files;
+}
+
+export async function updateFile(id: string, payload: Partial<{ name: string; description: string; fileType: FileType; googleDriveUrl: string }>) {
+  const res = await api.put<{ file: File }>(`/api/admin/files/${id}`, payload);
+  return res.data.file;
+}
+
+export async function deleteFile(id: string) {
+  await api.delete(`/api/admin/files/${id}`);
+}
+
+export async function createFile(payload: Partial<{ name: string; description: string; fileType: FileType; googleDriveUrl: string; folderId: string }>) {
+  const res = await api.post<{ file: File }>('/api/admin/files', payload);
+  return res.data.file;
+}
+
 export async function listUsers() {
   const res = await api.get<{ users: User[] }>('/api/admin/users');
   return res.data.users;

@@ -11,17 +11,13 @@ import SyllabusPage from './pages/SyllabusPage';
 import SyllabusFullPage from './pages/SyllabusFullPage';
 import MCQPracticePage from './pages/MCQPracticePage';
 import { useAuth } from './hooks/useAuth';
-import { Spinner } from './components/UI/Spinner';
+import { LoadingScreen } from './components/UI/LoadingScreen';
 
 const RequireAuth: React.FC<{ children: React.ReactElement; adminOnly?: boolean }> = ({ children, adminOnly }) => {
   const { user, isAuthenticated, initialized, loading } = useAuth();
 
   if (!initialized || loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <Spinner />
-      </div>
-    );
+    return <LoadingScreen />;
   }
 
   if (!isAuthenticated || !user) {
@@ -38,11 +34,7 @@ const RequireAuth: React.FC<{ children: React.ReactElement; adminOnly?: boolean 
 const AuthRedirect: React.FC<{ children: React.ReactElement }> = ({ children }) => {
   const { user, isAuthenticated, initialized, loading } = useAuth();
   if (!initialized || loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <Spinner />
-      </div>
-    );
+    return <LoadingScreen />;
   }
   if (isAuthenticated && user) {
     return <Navigate to={user.role === 'ADMIN' ? '/admin' : '/dashboard'} replace />;

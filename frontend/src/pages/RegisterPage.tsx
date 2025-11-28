@@ -31,85 +31,51 @@ const RegisterPage: React.FC = () => {
       setError(err.message || 'Registration failed');
     }
   };
+  
+  const inputStyles = "glass w-full rounded-xl border-transparent bg-black/20 px-3 py-2 text-white shadow-inner focus:border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary";
+  const labelStyles = "text-sm font-semibold text-slate-300";
 
   return (
     <AuthLayout title="Create your account" subtitle="Stay in sync with your study materials.">
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="space-y-2">
-          <label className="text-sm font-semibold text-midnight">Name</label>
-          <input
-            className="w-full rounded-xl border border-slate-200 bg-white/80 px-3 py-2 text-midnight shadow-inner focus:border-blue-400 focus:outline-none"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-          />
+        <div className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-2">
+              <label className={labelStyles}>Name</label>
+              <input className={inputStyles} value={name} onChange={(e) => setName(e.target.value)} required />
+            </div>
+            <div className="space-y-2">
+              <label className={labelStyles}>Email</label>
+              <input className={inputStyles} type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+            </div>
+            <div className="space-y-2">
+              <label className={labelStyles}>Password</label>
+              <input className={inputStyles} type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+            </div>
+            <div className="space-y-2">
+              <label className={labelStyles}>Confirm Password</label>
+              <input className={inputStyles} type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} required />
+            </div>
+            <div className="space-y-2">
+              <label className={labelStyles}>Phone (optional)</label>
+              <input className={inputStyles} value={phone} onChange={(e) => setPhone(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <label className={labelStyles}>School/College (optional)</label>
+              <input className={inputStyles} value={school} onChange={(e) => setSchool(e.target.value)} />
+            </div>
         </div>
         <div className="space-y-2">
-          <label className="text-sm font-semibold text-midnight">Email</label>
-          <input
-            className="w-full rounded-xl border border-slate-200 bg-white/80 px-3 py-2 text-midnight shadow-inner focus:border-blue-400 focus:outline-none"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
+            <label className={labelStyles}>Preparing for (optional)</label>
+            <input className={inputStyles} value={prep} onChange={(e) => setPrep(e.target.value)} />
         </div>
         <div className="space-y-2">
-          <label className="text-sm font-semibold text-midnight">Password</label>
-          <input
-            className="w-full rounded-xl border border-slate-200 bg-white/80 px-3 py-2 text-midnight shadow-inner focus:border-blue-400 focus:outline-none"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
+            <label className={labelStyles}>Avatar URL (optional)</label>
+            <input className={inputStyles} value={avatarUrl} onChange={(e) => setAvatarUrl(e.target.value)} placeholder="https://..." />
         </div>
-        <div className="space-y-2">
-          <label className="text-sm font-semibold text-midnight">Phone (optional)</label>
-          <input
-            className="w-full rounded-xl border border-slate-200 bg-white/80 px-3 py-2 text-midnight shadow-inner focus:border-blue-400 focus:outline-none"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-          />
-        </div>
-        <div className="space-y-2">
-          <label className="text-sm font-semibold text-midnight">School/College (optional)</label>
-          <input
-            className="w-full rounded-xl border border-slate-200 bg-white/80 px-3 py-2 text-midnight shadow-inner focus:border-blue-400 focus:outline-none"
-            value={school}
-            onChange={(e) => setSchool(e.target.value)}
-          />
-        </div>
-        <div className="space-y-2">
-          <label className="text-sm font-semibold text-midnight">Preparing for (optional)</label>
-          <input
-            className="w-full rounded-xl border border-slate-200 bg-white/80 px-3 py-2 text-midnight shadow-inner focus:border-blue-400 focus:outline-none"
-            value={prep}
-            onChange={(e) => setPrep(e.target.value)}
-          />
-        </div>
-        <div className="space-y-2">
-          <label className="text-sm font-semibold text-midnight">Avatar URL (optional)</label>
-          <input
-            className="w-full rounded-xl border border-slate-200 bg-white/80 px-3 py-2 text-midnight shadow-inner focus:border-blue-400 focus:outline-none"
-            value={avatarUrl}
-            onChange={(e) => setAvatarUrl(e.target.value)}
-            placeholder="https://..."
-          />
-        </div>
-        <div className="space-y-2">
-          <label className="text-sm font-semibold text-midnight">Confirm Password</label>
-          <input
-            className="w-full rounded-xl border border-slate-200 bg-white/80 px-3 py-2 text-midnight shadow-inner focus:border-blue-400 focus:outline-none"
-            type="password"
-            value={confirm}
-            onChange={(e) => setConfirm(e.target.value)}
-            required
-          />
-        </div>
-        <div className="text-sm">
-          <span className="text-slate-500">Already have an account?</span>{' '}
-          <Link to="/login" className="font-semibold text-blue-600 hover:underline">
+        
+        <div className="pt-2 text-sm">
+          <span className="text-slate-400">Already have an account?</span>{' '}
+          <Link to="/login" className="font-semibold text-primary hover:underline">
             Login
           </Link>
         </div>

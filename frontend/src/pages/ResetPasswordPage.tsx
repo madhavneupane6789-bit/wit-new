@@ -37,9 +37,9 @@ const ResetPasswordPage: React.FC = () => {
     <AuthLayout title="Reset password" subtitle="Choose a new password to secure your account.">
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">
-          <label className="text-sm font-semibold text-midnight">New password</label>
+          <label className="text-sm font-semibold text-slate-300">New password</label>
           <input
-            className="w-full rounded-xl border border-slate-200 bg-white/80 px-3 py-2 text-midnight shadow-inner focus:border-blue-400 focus:outline-none"
+            className="glass w-full rounded-xl border-transparent bg-black/20 px-3 py-2 text-white shadow-inner focus:border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary"
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -47,22 +47,22 @@ const ResetPasswordPage: React.FC = () => {
           />
         </div>
         <div className="space-y-2">
-          <label className="text-sm font-semibold text-midnight">Confirm password</label>
+          <label className="text-sm font-semibold text-slate-300">Confirm password</label>
           <input
-            className="w-full rounded-xl border border-slate-200 bg-white/80 px-3 py-2 text-midnight shadow-inner focus:border-blue-400 focus:outline-none"
+            className="glass w-full rounded-xl border-transparent bg-black/20 px-3 py-2 text-white shadow-inner focus:border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary"
             type="password"
             value={confirm}
             onChange={(e) => setConfirm(e.target.value)}
             required
           />
         </div>
-        {error && <p className="text-sm text-rose-500">{error}</p>}
-        {message && <p className="text-sm text-blue-600">{message}</p>}
+        {error && <p className="text-sm text-rose-400">{error}</p>}
+        {message && <p className="text-sm text-primary">{message}</p>}
         <Button type="submit" className="w-full" disabled={loading}>
           {loading ? 'Updating...' : 'Reset password'}
         </Button>
         <div className="text-sm">
-          <Link to="/login" className="font-semibold text-blue-600 hover:underline">
+          <Link to="/login" className="font-semibold text-primary hover:underline">
             Back to login
           </Link>
         </div>

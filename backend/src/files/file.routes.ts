@@ -4,6 +4,7 @@ import {
   createFileHandler,
   deleteFileHandler,
   getFileHandler,
+  listAllFilesHandler,
   listFilesHandler,
   updateFileHandler,
 } from './file.controller';
@@ -28,6 +29,7 @@ const idSchema = z.object({
 router.get('/files', requireAuth, requireApproved, listFilesHandler);
 router.get('/files/:id', requireAuth, requireApproved, validateRequest(idSchema), getFileHandler);
 
+router.get('/admin/files/all', requireAuth, requireRole('ADMIN'), listAllFilesHandler);
 router.post('/admin/files', requireAuth, requireRole('ADMIN'), validateRequest(z.object({ body: fileBody })), createFileHandler);
 router.put(
   '/admin/files/:id',

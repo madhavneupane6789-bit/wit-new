@@ -71,8 +71,12 @@ export async function deleteUser(id: string) {
   if (user.role === Role.ADMIN) {
     throw new AppError(400, 'Cannot delete admin');
   }
-  await prisma.bookmark.deleteMany({ where: { userId: id } });
-  await prisma.fileProgress.deleteMany({ where: { userId: id } });
-  await prisma.user.delete({ where: { id } });
+
+  await prisma.$transaction([
+    prisma.bookmark.deleteMany({ where: { userId: id } }),
+    prisma.fileProgress.deleteMany({ where: { userId: id } }),
+    prisma.user.delete({ where: { id } }),
+  ]);
+
   return true;
 }
