@@ -3,15 +3,19 @@
 @tailwind utilities;
 
 :root {
-  color: #f8fafc; /* default text color to light */
-  background-color: #1a202c; /* dark-start color */
+  color: #e9f5ff;
+  background-color: #0b1220;
 }
 
 body {
   margin: 0;
   font-family: 'Manrope', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  background-image: linear-gradient(to bottom right, #1a202c, #2d3748);
+  background-image:
+    radial-gradient(circle at 20% 20%, rgba(56, 189, 248, 0.2), transparent 35%),
+    radial-gradient(circle at 80% 0%, rgba(14, 165, 233, 0.18), transparent 38%),
+    linear-gradient(135deg, #0b1220, #0f1c2e 45%, #0a1a2f);
   min-height: 100vh;
+  color: #e9f5ff;
 }
 
 ::-webkit-scrollbar {
@@ -24,8 +28,9 @@ body {
 }
 
 .glass {
-  -webkit-backdrop-filter: blur(12px);
-  backdrop-filter: blur(12px);
-  background-color: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  background-color: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 12px 50px rgba(56, 189, 248, 0.18);
 }

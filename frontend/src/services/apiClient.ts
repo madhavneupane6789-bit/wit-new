@@ -3,7 +3,7 @@ import axios from 'axios';
 const envBase = import.meta.env.VITE_API_BASE_URL?.trim();
 
 // Always point to the deployed backend unless an explicit env override is provided (for local dev).
-const baseURL = envBase || 'https://wit-new-1.onrender.com';
+const baseURL = envBase || 'https://witback.onrender.com';
 
 const api = axios.create({
   baseURL,

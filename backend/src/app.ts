@@ -21,11 +21,18 @@ import { errorHandler } from './middleware/errorHandler';
 
 const app = express();
 
-// Security Middleware
+// Security & CORS
 app.use(helmet());
+const allowedOrigins = env.clientOrigins.length ? env.clientOrigins : [env.clientOrigin].filter(Boolean);
 app.use(
   cors({
-    origin: env.clientOrigin || 'https://witnea.onrender.com',
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      return callback(new Error('Not allowed by CORS'));
+    },
     credentials: true,
   }),
 );

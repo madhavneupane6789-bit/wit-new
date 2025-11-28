@@ -10,6 +10,14 @@ export const env = {
   accessTokenExpiresIn: process.env.ACCESS_TOKEN_EXPIRES_IN || '15m',
   refreshTokenExpiresIn: process.env.REFRESH_TOKEN_EXPIRES_IN || '7d',
   clientOrigin: (process.env.CLIENT_ORIGIN || '').trim(),
+  clientOrigins: (
+    process.env.CLIENT_ORIGINS ||
+    process.env.CLIENT_ORIGIN ||
+    'https://witnea.onrender.com,https://www.witnea.onrender.com'
+  )
+    .split(',')
+    .map((o) => o.trim())
+    .filter(Boolean),
   cookieSecure:
     process.env.COOKIE_SECURE === 'true' ||
     (!process.env.COOKIE_SECURE && process.env.NODE_ENV === 'production'),
