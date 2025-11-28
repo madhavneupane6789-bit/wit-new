@@ -15,6 +15,7 @@ import userStatsRoutes from './users/user.stats.routes';
 import uploadRoutes from './misc/upload.routes';
 import syllabusRoutes from './syllabus/syllabus.routes';
 import mcqRoutes from './mcq/mcq.routes';
+import { mcqAiRoutes } from './mcq-ai/mcq-ai.routes'; // Import new route
 import mediaRoutes from './misc/media.routes';
 import { env } from './config/env';
 import { errorHandler } from './middleware/errorHandler';
@@ -23,7 +24,10 @@ const app = express();
 
 // Security & CORS
 app.use(helmet());
-const allowedOrigins = env.clientOrigins.length ? env.clientOrigins : [env.clientOrigin].filter(Boolean);
+const allowedOrigins =
+  env.clientOrigins.length > 0
+    ? env.clientOrigins
+    : [env.clientOrigin, 'https://witnea.onrender.com', 'https://www.witnea.onrender.com'].filter(Boolean);
 app.use(
   cors({
     origin: (origin, callback) => {
@@ -68,6 +72,7 @@ app.use('/api', userStatsRoutes);
 app.use('/api', uploadRoutes);
 app.use('/api', syllabusRoutes);
 app.use('/api', mcqRoutes);
+app.use('/api/mcq-ai', mcqAiRoutes); // Add new route
 app.use('/api', mediaRoutes);
 
 app.use(errorHandler);
