@@ -21,6 +21,8 @@ import { env } from './config/env';
 import { errorHandler } from './middleware/errorHandler';
 
 const app = express();
+// Behind a proxy (Render/NGINX) to honor X-Forwarded-* for rate limiting and IPs
+app.set('trust proxy', 1);
 
 // Security & CORS
 app.use(helmet());
