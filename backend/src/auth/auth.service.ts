@@ -99,14 +99,6 @@ export async function loginUser(params: { email: string; password: string }) {
     throw new AppError(400, 'Invalid credentials');
   }
 
-  if (user.status === 'PENDING') {
-    throw new AppError(403, 'Your account is pending activation. Please wait for an administrator to approve it.');
-  }
-
-  if (user.status === 'INACTIVE') {
-    throw new AppError(403, 'Your account is inactive. Please contact support.');
-  }
-
   // Update lastLoginDate
   await prisma.user.update({
     where: { id: user.id },
