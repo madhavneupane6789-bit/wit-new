@@ -1,5 +1,4 @@
 import React from 'react';
-import { Link } from 'react-router-dom'; // Import Link
 import { useAuth } from '../../hooks/useAuth';
 import { Button } from '../UI/Button';
 
@@ -34,9 +33,6 @@ export const DashboardLayout: React.FC<Props> = ({ title, children }) => {
               <p className="text-sm font-semibold text-white">{user?.name}</p>
               <p className="text-xs text-slate-400">{user?.role}</p>
             </div>
-            <Link to="/mcq-ai">
-              <Button variant="ghost">AI MCQ</Button>
-            </Link>
             <Button variant="ghost" onClick={logout}>
               Logout
             </Button>

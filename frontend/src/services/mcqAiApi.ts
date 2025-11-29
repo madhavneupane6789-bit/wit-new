@@ -1,12 +1,20 @@
-import axios from 'axios';
-import { McqQuestionResponse } from '../pages/MCQAI'; // Assuming type is defined there. Consider moving to a shared types file.
+import api from './apiClient';
 
-const API_URL = import.meta.env.VITE_API_BASE_URL || '/api';
+export type McqQuestionResponse = {
+  question: string;
+  options: {
+    A: string;
+    B: string;
+    C: string;
+    D: string;
+  };
+  correctAnswer: 'A' | 'B' | 'C' | 'D';
+  explanation: string;
+};
 
 export async function generateMcqQuestion(topic: string): Promise<McqQuestionResponse> {
-  const response = await axios.get<McqQuestionResponse>(`${API_URL}/mcq-ai/generate`, {
+  const response = await api.get<McqQuestionResponse>('/api/mcq-ai/generate', {
     params: { topic },
-    withCredentials: true,
   });
   return response.data;
 }

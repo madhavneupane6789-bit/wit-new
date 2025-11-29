@@ -189,6 +189,9 @@ const UserDashboardPage: React.FC = () => {
         <Link to="/mcq">
           <Button variant="ghost">MCQ Practice</Button>
         </Link>
+        <Link to="/mcq-ai">
+          <Button variant="ghost">AI MCQ</Button>
+        </Link>
         <div className="ml-auto text-sm text-slate-400">Local time: {now}</div>
       </div>
 

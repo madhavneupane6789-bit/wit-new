@@ -1,21 +1,11 @@
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { generateMcqQuestion } from '../services/mcqAiApi';
+import { generateMcqQuestion, McqQuestionResponse } from '../services/mcqAiApi';
 import { Button } from '../components/UI/Button';
 import { Card } from '../components/UI/Card';
 import { Spinner } from '../components/UI/Spinner';
-
-interface McqQuestion {
-  question: string;
-  options: {
-    A: string;
-    B: string;
-    C: string;
-    D: string;
-  };
-  correctAnswer: 'A' | 'B' | 'C' | 'D';
-  explanation: string;
-}
+import { DashboardLayout } from '../components/Layout/DashboardLayout';
+import { Link } from 'react-router-dom';
 
 export default function MCQAI() {
   const [topic, setTopic] = useState('');
@@ -23,7 +13,7 @@ export default function MCQAI() {
   const [showAnswer, setShowAnswer] = useState(false);
 
   const { mutate, data: mcq, isLoading, isError, error, reset } = useMutation<
-    McqQuestion,
+    McqQuestionResponse,
     Error,
     string
   >(generateMcqQuestion);
@@ -44,63 +34,103 @@ export default function MCQAI() {
   };
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-6 text-gray-800">MCQ with AI</h1>
-      <Card className="mb-6 p-6 shadow-lg rounded-lg">
-        <form onSubmit={handleSubmit} className="flex flex-col md:flex-row gap-4">
-          <input
-            type="text"
-            value={topic}
-            onChange={(e) => setTopic(e.target.value)}
-            placeholder="Enter a topic (e.g., 'Nepalese History', 'Computer Science Basics')"
-            className="flex-grow p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            disabled={isLoading}
-          />
-          <Button type="submit" disabled={isLoading} className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-md transition-colors duration-200">
-            {isLoading ? <Spinner /> : 'Generate MCQ'}
-          </Button>
-        </form>
-        {isError && (
-          <p className="text-red-600 mt-4">Error: {error?.message || 'Failed to generate MCQ.'}</p>
-        )}
-      </Card>
+    <DashboardLayout title="AI MCQ Generator">
+      <div className="mb-6 flex items-center gap-2">
+        <Link to="/dashboard">
+          <Button variant="ghost">← Back</Button>
+        </Link>
+        <Link to="/mcq">
+          <Button variant="ghost">MCQ Practice</Button>
+        </Link>
+      </div>
 
-      {mcq && (
-        <Card className="p-6 shadow-lg rounded-lg">
-          <h2 className="text-2xl font-semibold mb-4 text-gray-700">Question:</h2>
-          <p className="text-xl mb-6 text-gray-900">{mcq.question}</p>
-
-          <div className="space-y-3 mb-6">
-            {Object.entries(mcq.options).map(([key, value]) => (
-              <button
-                key={key}
-                onClick={() => handleOptionSelect(key)}
-                className={`w-full text-left p-4 border rounded-md transition-colors duration-200
-                  ${selectedOption === key ? 'bg-blue-100 border-blue-500' : 'bg-white hover:bg-gray-50 border-gray-300'}
-                  ${showAnswer && key === mcq.correctAnswer ? 'border-green-500 ring-2 ring-green-500' : ''}
-                  ${showAnswer && selectedOption === key && selectedOption !== mcq.correctAnswer ? 'border-red-500 ring-2 ring-red-500' : ''}
-                  `}
-                disabled={showAnswer}
-              >
-                <span className="font-bold mr-2">{key}.</span> {value}
-              </button>
-            ))}
+      <div className="grid gap-6 lg:grid-cols-3">
+        <Card className="lg:col-span-1 space-y-4">
+          <div>
+            <p className="text-xs uppercase tracking-[0.22em] text-secondary">Prompt</p>
+            <h2 className="mt-1 text-xl font-semibold text-white">Generate an MCQ</h2>
+            <p className="text-sm text-slate-300">
+              Enter any topic and let AI craft a question with options and explanation.
+            </p>
           </div>
-
-          {showAnswer && (
-            <div>
-              <p className="text-lg font-bold mb-2">
-                Your Answer: <span className={selectedOption === mcq.correctAnswer ? 'text-green-600' : 'text-red-600'}>
-                  {selectedOption === mcq.correctAnswer ? 'Correct!' : 'Incorrect.'}
-                </span>
+          <form onSubmit={handleSubmit} className="space-y-3">
+            <input
+              type="text"
+              value={topic}
+              onChange={(e) => setTopic(e.target.value)}
+              placeholder="e.g. Constitutional law, Organic chemistry, Basic algebra"
+              className="glass w-full rounded-xl border-transparent bg-black/30 px-4 py-3 text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary"
+              disabled={isLoading}
+            />
+            <Button type="submit" disabled={isLoading} className="w-full">
+              {isLoading ? <Spinner /> : 'Generate MCQ'}
+            </Button>
+            {isError && (
+              <p className="text-sm text-rose-400">
+                {error?.message || 'Failed to generate MCQ.'}
               </p>
-              <p className="text-lg font-bold mb-2">Correct Answer: <span className="text-green-600">{mcq.correctAnswer}</span></p>
-              <h3 className="text-xl font-semibold mt-4 mb-2 text-gray-700">Explanation:</h3>
-              <p className="text-base text-gray-800">{mcq.explanation}</p>
+            )}
+          </form>
+        </Card>
+
+        <Card className="lg:col-span-2">
+          {!mcq ? (
+            <div className="flex h-full min-h-[260px] items-center justify-center text-slate-400 text-sm">
+              Ask for a topic to see the generated question here.
+            </div>
+          ) : (
+            <div className="space-y-5">
+              <div>
+                <p className="text-xs uppercase tracking-[0.22em] text-secondary">Question</p>
+                <h3 className="mt-2 text-2xl font-semibold text-white">{mcq.question}</h3>
+              </div>
+
+              <div className="space-y-3">
+                {Object.entries(mcq.options).map(([key, value]) => {
+                  const isSelected = selectedOption === key;
+                  const isCorrect = mcq.correctAnswer === key;
+                  return (
+                    <button
+                      key={key}
+                      onClick={() => handleOptionSelect(key)}
+                      className={`glass flex w-full items-center justify-between rounded-2xl border px-4 py-3 text-left transition-all ${
+                        isSelected
+                          ? isCorrect
+                            ? 'border-emerald-500/50 bg-emerald-500/20 text-white'
+                            : 'border-rose-500/50 bg-rose-500/20 text-white'
+                          : 'border-transparent hover:bg-white/10'
+                      } ${isCorrect && showAnswer && !isSelected ? 'border-emerald-500/50 bg-emerald-500/20' : ''}`}
+                      disabled={showAnswer}
+                    >
+                      <span className="font-semibold text-white">
+                        {key}. {value}
+                      </span>
+                      {isSelected && <span className="text-xs">{isCorrect ? 'Correct' : 'Your choice'}</span>}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {showAnswer && (
+                <div className="rounded-xl bg-black/30 p-4 text-slate-100">
+                  <p className="text-sm">
+                    Your answer:{' '}
+                    <span className={selectedOption === mcq.correctAnswer ? 'text-emerald-400' : 'text-rose-400'}>
+                      {selectedOption === mcq.correctAnswer ? 'Correct' : 'Incorrect'}
+                    </span>
+                  </p>
+                  <p className="text-sm">
+                    Correct: <span className="text-emerald-400">{mcq.correctAnswer}</span>
+                  </p>
+                  <p className="mt-3 text-sm text-slate-200">
+                    {mcq.explanation}
+                  </p>
+                </div>
+              )}
             </div>
           )}
         </Card>
-      )}
-    </div>
+      </div>
+    </DashboardLayout>
   );
 }
