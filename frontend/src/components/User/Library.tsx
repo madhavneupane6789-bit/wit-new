@@ -49,8 +49,8 @@ export const Library: React.FC<LibraryProps> = ({ viewSyllabus, setPlayerFile })
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const load = useCallback(async () => {
-    setLoading(true);
+  const load = useCallback(async (showSpinner = true) => {
+    if (showSpinner) setLoading(true);
     setError(null);
     try {
       const data = await fetchUserTree();
@@ -59,7 +59,7 @@ export const Library: React.FC<LibraryProps> = ({ viewSyllabus, setPlayerFile })
     } catch (err: any) {
       setError(err.message || 'Failed to load content');
     } finally {
-      setLoading(false);
+      if (showSpinner) setLoading(false);
     }
   }, []);
 
@@ -70,6 +70,23 @@ export const Library: React.FC<LibraryProps> = ({ viewSyllabus, setPlayerFile })
   const currentFolder = useMemo(() => findFolder(tree, selectedFolder), [tree, selectedFolder]);
   const filesToShow = selectedFolder ? currentFolder?.files || [] : rootFiles;
   const folderChildren = selectedFolder ? currentFolder?.children || [] : tree;
+  const updateFileLocally = (fileId: string, updater: (f: FileItem) => Partial<FileItem>) => {
+    let nextRoots: FileItem[] = [];
+    setRootFiles((prev) => {
+      nextRoots = prev.map((f) => (f.id === fileId ? { ...f, ...updater(f) } : f));
+      return nextRoots;
+    });
+
+    setTree((prev) => {
+      const walk = (nodes: FolderNode[]): FolderNode[] =>
+        nodes.map((n) => ({
+          ...n,
+          files: n.files.map((f) => (f.id === fileId ? { ...f, ...updater(f) } : f)),
+          children: walk(n.children),
+        }));
+      return walk(prev);
+    });
+  };
   
   const allFiles = useMemo(() => {
     const flat: FileItem[] = [...rootFiles];
@@ -90,7 +107,7 @@ export const Library: React.FC<LibraryProps> = ({ viewSyllabus, setPlayerFile })
       } else {
         await addBookmark(file.id);
       }
-      await load();
+      updateFileLocally(file.id, (f) => ({ bookmarked: !f.bookmarked }));
     } catch (err: any) {
       setError(err.message || 'Bookmark update failed');
     }
@@ -99,7 +116,7 @@ export const Library: React.FC<LibraryProps> = ({ viewSyllabus, setPlayerFile })
   const toggleCompleted = async (file: FileItem) => {
     try {
       await setProgress(file.id, !file.completed);
-      await load();
+      updateFileLocally(file.id, (f) => ({ completed: !f.completed }));
     } catch (err: any) {
       setError(err.message || 'Progress update failed');
     }
