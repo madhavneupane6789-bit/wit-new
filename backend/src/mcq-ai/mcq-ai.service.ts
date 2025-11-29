@@ -1,7 +1,8 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
-const MODEL = "gemini-2.5-flash";
+// Default to the lighter/free tier model; allow override via env.
+const MODEL = process.env.GEMINI_MODEL || "gemini-1.5-flash";
 
 export const generateMcq = async (topic: string) => {
   try {
