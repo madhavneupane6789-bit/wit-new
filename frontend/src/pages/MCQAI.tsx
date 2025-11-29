@@ -12,11 +12,9 @@ export default function MCQAI() {
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [showAnswer, setShowAnswer] = useState(false);
 
-  const { mutate, data: mcq, isLoading, isError, error, reset } = useMutation<
-    McqQuestionResponse,
-    Error,
-    string
-  >(generateMcqQuestion);
+  const { mutate, data: mcq, isLoading, isError, error, reset } = useMutation<McqQuestionResponse, Error, string>({
+    mutationFn: generateMcqQuestion,
+  });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
