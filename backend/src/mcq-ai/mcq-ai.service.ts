@@ -9,9 +9,10 @@ const DEEPSEEK_MODEL = process.env.DEEPSEEK_MODEL || "deepseek-chat";
 const promptFor = (topic?: string) => {
   const scope = topic && topic.trim().length
     ? `Focus on the topic "${topic}".`
-    : 'Cover the NEA (Nepal Electricity Authority) Loksewa Level 4/5 syllabus broadly: electrical/technical, management, general knowledge, quantitative aptitude, and current affairs.';
+    : 'Cover the NEA (Nepal Electricity Authority) Loksewa Level 4/5 syllabus broadly: Samanya Gyan (general knowledge), electrical/technical, management, quantitative aptitude, and current affairs.';
 
-  return `Generate one multiple-choice question for NEA Loksewa preparation in Nepal. ${scope}
+  return `Generate one concise multiple-choice question for NEA Loksewa preparation in Nepal. ${scope}
+Keep the stem short and clear.
 Return strict JSON with this shape:
 {
   "question": "string",
