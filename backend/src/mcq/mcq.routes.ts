@@ -1,6 +1,15 @@
 import { Router } from 'express';
 import { z } from 'zod';
-import { listQuestionsHandler, createQuestionHandler, answerQuestionHandler, deleteQuestionHandler } from './mcq.controller';
+import {
+  listQuestionsHandler,
+  createQuestionHandler,
+  answerQuestionHandler,
+  deleteQuestionHandler,
+  suggestQuestionHandler,
+  listSuggestionsHandler,
+  approveSuggestionHandler,
+  rejectSuggestionHandler,
+} from './mcq.controller';
 import { validateRequest } from '../middleware/validateRequest';
 import { requireAuth, requireRole } from '../middleware/requireAuth';
 import { requireApproved } from '../middleware/requireApproved';
@@ -35,8 +44,12 @@ const idSchema = z.object({
 
 router.get('/mcq', requireAuth, requireApproved, requireActive, listQuestionsHandler);
 router.post('/mcq/answer', requireAuth, requireApproved, requireActive, validateRequest(answerSchema), answerQuestionHandler);
+router.post('/mcq/suggest', requireAuth, requireApproved, requireActive, validateRequest(createSchema), suggestQuestionHandler);
 
 router.post('/admin/mcq', requireAuth, requireRole('ADMIN'), validateRequest(createSchema), createQuestionHandler);
 router.delete('/admin/mcq/:id', requireAuth, requireRole('ADMIN'), validateRequest(idSchema), deleteQuestionHandler);
+router.get('/admin/mcq/suggestions', requireAuth, requireRole('ADMIN'), listSuggestionsHandler);
+router.post('/admin/mcq/suggestions/:id/approve', requireAuth, requireRole('ADMIN'), validateRequest(idSchema), approveSuggestionHandler);
+router.post('/admin/mcq/suggestions/:id/reject', requireAuth, requireRole('ADMIN'), validateRequest(idSchema), rejectSuggestionHandler);
 
 export default router;

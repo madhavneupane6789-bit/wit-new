@@ -1,5 +1,14 @@
 import { NextFunction, Request, Response } from 'express';
-import { answerQuestion, createQuestion, listQuestions, deleteQuestion } from './mcq.service';
+import {
+  answerQuestion,
+  createQuestion,
+  listQuestions,
+  deleteQuestion,
+  suggestQuestion,
+  listSuggestions,
+  approveSuggestion,
+  rejectSuggestion,
+} from './mcq.service';
 import { AppError } from '../middleware/errorHandler';
 
 export async function listQuestionsHandler(_req: Request, res: Response, next: NextFunction) {
@@ -56,6 +65,54 @@ export async function deleteQuestionHandler(req: Request, res: Response, next: N
     const { id } = req.params;
     await deleteQuestion(id);
     res.json({ message: 'Deleted' });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function suggestQuestionHandler(req: Request, res: Response, next: NextFunction) {
+  try {
+    const { question, optionA, optionB, optionC, optionD, correctOption, explanation } = req.body;
+    const created = await suggestQuestion({
+      question,
+      optionA,
+      optionB,
+      optionC,
+      optionD,
+      correctOption,
+      explanation,
+      submittedById: req.user?.id,
+    });
+    res.status(201).json({ suggestion: created });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function listSuggestionsHandler(_req: Request, res: Response, next: NextFunction) {
+  try {
+    const suggestions = await listSuggestions('PENDING');
+    res.json({ suggestions });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function approveSuggestionHandler(req: Request, res: Response, next: NextFunction) {
+  try {
+    const { id } = req.params;
+    const question = await approveSuggestion(id, req.user?.id);
+    res.json({ question });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function rejectSuggestionHandler(req: Request, res: Response, next: NextFunction) {
+  try {
+    const { id } = req.params;
+    await rejectSuggestion(id, req.user?.id);
+    res.json({ message: 'Rejected' });
   } catch (err) {
     next(err);
   }

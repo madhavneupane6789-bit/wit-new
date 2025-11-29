@@ -41,3 +41,37 @@ export async function adminDeleteMcq(id: string) {
   const res = await api.delete(`/api/admin/mcq/${id}`);
   return res.data;
 }
+
+export type MCQSuggestion = MCQQuestion & {
+  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  submittedBy?: { id: string; name: string; email: string } | null;
+  createdAt?: string;
+};
+
+export async function suggestMcq(payload: {
+  question: string;
+  optionA: string;
+  optionB: string;
+  optionC: string;
+  optionD: string;
+  correctOption: 'A' | 'B' | 'C' | 'D';
+  explanation?: string;
+}) {
+  const res = await api.post('/api/mcq/suggest', payload);
+  return res.data.suggestion as MCQSuggestion;
+}
+
+export async function adminListSuggestions() {
+  const res = await api.get<{ suggestions: MCQSuggestion[] }>('/api/admin/mcq/suggestions');
+  return res.data.suggestions;
+}
+
+export async function adminApproveSuggestion(id: string) {
+  const res = await api.post<{ question: MCQQuestion }>(`/api/admin/mcq/suggestions/${id}/approve`);
+  return res.data.question;
+}
+
+export async function adminRejectSuggestion(id: string) {
+  const res = await api.post(`/api/admin/mcq/suggestions/${id}/reject`);
+  return res.data;
+}

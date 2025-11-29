@@ -1,7 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { Card } from '../UI/Card';
 import { Button } from '../UI/Button';
-import { MCQQuestion, adminCreateMcq, adminDeleteMcq, fetchMcqQuestions } from '../../services/mcqApi';
+import {
+  MCQQuestion,
+  adminCreateMcq,
+  adminDeleteMcq,
+  fetchMcqQuestions,
+  adminListSuggestions,
+  MCQSuggestion,
+  adminApproveSuggestion,
+  adminRejectSuggestion,
+} from '../../services/mcqApi';
 
 export const MCQManagement: React.FC = () => {
   const [mcqForm, setMcqForm] = useState({
@@ -14,12 +23,14 @@ export const MCQManagement: React.FC = () => {
     explanation: '',
   });
   const [mcqList, setMcqList] = useState<MCQQuestion[]>([]);
+  const [suggestions, setSuggestions] = useState<MCQSuggestion[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   const loadMcq = async () => {
     try {
-      const res = await fetchMcqQuestions();
+      const [res, suggs] = await Promise.all([fetchMcqQuestions(), adminListSuggestions()]);
       setMcqList(res);
+      setSuggestions(suggs);
     } catch (err: any) {
       setError(err.message || 'Failed to load MCQs');
     }
@@ -129,6 +140,70 @@ export const MCQManagement: React.FC = () => {
                 >
                   Delete
                 </Button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </Card>
+      <Card>
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-xs uppercase tracking-[0.22em] text-secondary">User suggestions</p>
+            <h3 className="text-xl font-semibold text-white">Pending AI submissions</h3>
+          </div>
+          <Button variant="ghost" onClick={loadMcq}>
+            Refresh
+          </Button>
+        </div>
+        <div className="mt-3 space-y-3">
+          {suggestions.length === 0 && <p className="text-sm text-slate-400">No pending suggestions.</p>}
+          {suggestions.map((s) => (
+            <div key={s.id} className="glass rounded-2xl p-3">
+              <div className="flex items-start justify-between gap-2">
+                <div>
+                  <p className="font-semibold text-white">{s.question}</p>
+                  <ul className="mt-2 list-disc space-y-1 pl-4 text-sm text-slate-300">
+                    <li>A. {s.optionA}</li>
+                    <li>B. {s.optionB}</li>
+                    <li>C. {s.optionC}</li>
+                    <li>D. {s.optionD}</li>
+                  </ul>
+                  <p className="mt-2 text-xs text-emerald-400">Correct: {s.correctOption}</p>
+                  {s.explanation && <p className="text-xs text-slate-400">Explanation: {s.explanation}</p>}
+                  {s.submittedBy && (
+                    <p className="text-xs text-slate-500 mt-1">
+                      Submitted by {s.submittedBy.name || s.submittedBy.email}
+                    </p>
+                  )}
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    variant="primary"
+                    onClick={async () => {
+                      try {
+                        await adminApproveSuggestion(s.id);
+                        await loadMcq();
+                      } catch (err: any) {
+                        setError(err.message || 'Approve failed');
+                      }
+                    }}
+                  >
+                    Approve
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    onClick={async () => {
+                      try {
+                        await adminRejectSuggestion(s.id);
+                        await loadMcq();
+                      } catch (err: any) {
+                        setError(err.message || 'Reject failed');
+                      }
+                    }}
+                  >
+                    Reject
+                  </Button>
+                </div>
               </div>
             </div>
           ))}

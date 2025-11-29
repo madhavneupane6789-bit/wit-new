@@ -36,6 +36,12 @@ enum MCQOption {
   D
 }
 
+enum SuggestionStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 model User {
   id                String   @id @default(uuid())
   name              String
@@ -60,6 +66,8 @@ model User {
   folders           Folder[] @relation("FolderCreatedBy")
   bookmarks         Bookmark[]
   progress          FileProgress[]
+  mcqSuggestionsSubmitted MCQSuggestion[] @relation("SubmittedBy")
+  mcqSuggestionsApproved  MCQSuggestion[] @relation("ApprovedBy")
 }
 
 model PasswordResetToken {
@@ -171,4 +179,22 @@ model MCQQuestion {
   explanation   String?
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt
+}
+
+model MCQSuggestion {
+  id            String           @id @default(uuid())
+  question      String
+  optionA       String
+  optionB       String
+  optionC       String
+  optionD       String
+  correctOption MCQOption
+  explanation   String?
+  status        SuggestionStatus @default(PENDING)
+  submittedBy   User?            @relation("SubmittedBy", fields: [submittedById], references: [id])
+  submittedById String?
+  createdAt     DateTime         @default(now())
+  approvedAt    DateTime?
+  approvedBy    User?            @relation("ApprovedBy", fields: [approvedById], references: [id])
+  approvedById  String?
 }

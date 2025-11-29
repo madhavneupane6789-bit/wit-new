@@ -6,15 +6,27 @@ import { Card } from '../components/UI/Card';
 import { Spinner } from '../components/UI/Spinner';
 import { DashboardLayout } from '../components/Layout/DashboardLayout';
 import { Link } from 'react-router-dom';
+import { suggestMcq } from '../services/mcqApi';
 
 export default function MCQAI() {
   const [topic, setTopic] = useState('');
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [showAnswer, setShowAnswer] = useState(false);
   const [model, setModel] = useState<'gemini' | 'deepseek'>('gemini');
+  const [saveMessage, setSaveMessage] = useState<string | null>(null);
 
   const { mutate, data: mcq, isLoading, isError, error, reset } = useMutation<McqQuestionResponse, Error, { topic: string; model: 'gemini' | 'deepseek' }>({
     mutationFn: generateMcqQuestion,
+  });
+
+  const saveMutation = useMutation({
+    mutationFn: suggestMcq,
+    onSuccess: () => {
+      setSaveMessage('Sent to question bank for admin approval.');
+    },
+    onError: (err: any) => {
+      setSaveMessage(err.message || 'Failed to send suggestion.');
+    },
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -157,6 +169,25 @@ export default function MCQAI() {
                 </div>
               )}
               <div className="flex justify-end gap-2">
+                <Button
+                  variant="ghost"
+                  onClick={() => {
+                    if (!mcq) return;
+                    setSaveMessage(null);
+                    saveMutation.mutate({
+                      question: mcq.question,
+                      optionA: mcq.options.A,
+                      optionB: mcq.options.B,
+                      optionC: mcq.options.C,
+                      optionD: mcq.options.D,
+                      correctOption: mcq.correctAnswer,
+                      explanation: mcq.explanation,
+                    });
+                  }}
+                  disabled={!mcq || saveMutation.isLoading}
+                >
+                  {saveMutation.isLoading ? 'Sending...' : 'Save to question bank'}
+                </Button>
                 <Button variant="ghost" onClick={() => { setSelectedOption(null); setShowAnswer(false); }}>
                   Reset choices
                 </Button>
@@ -164,6 +195,7 @@ export default function MCQAI() {
                   Next question
                 </Button>
               </div>
+              {saveMessage && <p className="text-sm text-slate-300">{saveMessage}</p>}
             </div>
           )}
         </Card>
