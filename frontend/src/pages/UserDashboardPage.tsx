@@ -81,6 +81,41 @@ const UserDashboardPage: React.FC = () => {
   const overallProgress =
     progress || (allFiles.length ? Math.round((allFiles.filter((f) => f.completed).length / allFiles.length) * 100) : 0);
 
+  const updateFileLocally = (fileId: string, updater: (f: FileItem) => Partial<FileItem>) => {
+    let nextRoots: FileItem[] = [];
+    setRootFiles((prev) => {
+      nextRoots = prev.map((f) => (f.id === fileId ? { ...f, ...updater(f) } : f));
+      return nextRoots;
+    });
+
+    setTree((prev) => {
+      const walk = (nodes: FolderNode[]): FolderNode[] =>
+        nodes.map((n) => ({
+          ...n,
+          files: n.files.map((f) => (f.id === fileId ? { ...f, ...updater(f) } : f)),
+          children: walk(n.children),
+        }));
+      const nextTree = walk(prev);
+
+      const computeAll = (roots: FileItem[], nodes: FolderNode[]) => {
+        const flat: FileItem[] = [...roots];
+        const walkAll = (list: FolderNode[]) => {
+          list.forEach((n) => {
+            flat.push(...n.files);
+            walkAll(n.children);
+          });
+        };
+        walkAll(nodes);
+        return flat;
+      };
+      const flat = computeAll(nextRoots, nextTree);
+      const pct = flat.length ? Math.round((flat.filter((f) => f.completed).length / flat.length) * 100) : 0;
+      setProgressValue(pct);
+
+      return nextTree;
+    });
+  };
+
   const toggleBookmark = async (file: FileItem) => {
     try {
       if (file.bookmarked) {
@@ -88,7 +123,7 @@ const UserDashboardPage: React.FC = () => {
       } else {
         await addBookmark(file.id);
       }
-      await load(false);
+      updateFileLocally(file.id, (f) => ({ bookmarked: !f.bookmarked }));
     } catch (err: any) {
       setError(err.message || 'Bookmark update failed');
     }
@@ -97,7 +132,7 @@ const UserDashboardPage: React.FC = () => {
   const toggleCompleted = async (file: FileItem) => {
     try {
       await setProgress(file.id, !file.completed);
-      await load(false);
+      updateFileLocally(file.id, (f) => ({ completed: !f.completed }));
     } catch (err: any) {
       setError(err.message || 'Progress update failed');
     }
