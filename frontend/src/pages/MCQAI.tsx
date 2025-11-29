@@ -39,7 +39,6 @@ export default function MCQAI() {
   };
 
   const fillQueue = async (resetQueue = false) => {
-    if (!topic.trim()) return;
     if (resetQueue) {
       updateQueue(() => []);
     }
@@ -47,7 +46,7 @@ export default function MCQAI() {
     setError(null);
     try {
       while (queueRef.current.length < 3) {
-        const mcq = await generateMcqQuestion({ topic, model });
+        const mcq = await generateMcqQuestion({ topic: topic.trim(), model });
         updateQueue((prev) => [...prev, mcq]);
       }
     } catch (err: any) {
@@ -59,7 +58,6 @@ export default function MCQAI() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!topic.trim()) return;
     setSaveMessage(null);
     setSelectedOption(null);
     setShowAnswer(false);
@@ -72,7 +70,6 @@ export default function MCQAI() {
   };
 
   const fetchNext = () => {
-    if (!topic.trim()) return;
     setSelectedOption(null);
     setShowAnswer(false);
     setSaveMessage(null);

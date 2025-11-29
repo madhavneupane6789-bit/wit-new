@@ -6,7 +6,12 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-2.5-flash";
 const DEEPSEEK_MODEL = process.env.DEEPSEEK_MODEL || "deepseek-chat";
 
-const promptFor = (topic: string) => `Generate one multiple-choice question about "${topic}" suitable for a civil service exam in Nepal.
+const promptFor = (topic?: string) => {
+  const scope = topic && topic.trim().length
+    ? `Focus on the topic "${topic}".`
+    : 'Cover the NEA (Nepal Electricity Authority) Loksewa Level 4/5 syllabus broadly: electrical/technical, management, general knowledge, quantitative aptitude, and current affairs.';
+
+  return `Generate one multiple-choice question for NEA Loksewa preparation in Nepal. ${scope}
 Return strict JSON with this shape:
 {
   "question": "string",
@@ -14,20 +19,21 @@ Return strict JSON with this shape:
   "correctAnswer": "A"|"B"|"C"|"D",
   "explanation": "string"
 }`;
+};
 
 function parseJsonResponse(text: string) {
   const cleaned = text.trim().replace(/^```(?:json)?\s*/i, "").replace(/```$/, "");
   return JSON.parse(cleaned);
 }
 
-async function generateWithGemini(topic: string) {
+async function generateWithGemini(topic?: string) {
   const model = genAI.getGenerativeModel({ model: GEMINI_MODEL });
   const result = await model.generateContent(promptFor(topic));
   const text = (await result.response.text()).trim();
   return parseJsonResponse(text);
 }
 
-async function generateWithDeepseek(topic: string) {
+async function generateWithDeepseek(topic?: string) {
   if (!process.env.DEEPSEEK_API_KEY) {
     throw new Error("DEEPSEEK_API_KEY is missing");
   }
@@ -60,7 +66,7 @@ async function generateWithDeepseek(topic: string) {
   }
 }
 
-export const generateMcq = async (topic: string, provider: "gemini" | "deepseek" = "gemini") => {
+export const generateMcq = async (topic?: string, provider: "gemini" | "deepseek" = "gemini") => {
   try {
     if (provider === "deepseek") {
       return await generateWithDeepseek(topic);
