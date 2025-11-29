@@ -1,11 +1,13 @@
-import { Router } from 'express';
-import { generateMcqQuestionHandler } from './mcq-ai.controller';
-import { requireAuth } from '../middleware/requireAuth';
-import { requireApproved } from '../middleware/requireApproved';
-import { requireActive } from '../middleware/requireActive'; // Import new middleware
+import express from "express";
+import * as McqAiController from "./mcq-ai.controller";
+import { requireAuth } from "../middleware/requireAuth";
 
-const router = Router();
+const router = express.Router();
 
-router.get('/generate', requireAuth, requireApproved, requireActive, generateMcqQuestionHandler);
+router.post(
+  "/generate",
+  requireAuth,
+  McqAiController.generateMcqHandler
+);
 
-export { router as mcqAiRoutes };
+export default router;

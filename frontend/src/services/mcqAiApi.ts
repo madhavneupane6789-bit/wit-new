@@ -13,8 +13,8 @@ export type McqQuestionResponse = {
 };
 
 export async function generateMcqQuestion(topic: string): Promise<McqQuestionResponse> {
-  const response = await api.get<McqQuestionResponse>('/api/mcq-ai/generate', {
-    params: { topic },
+  const response = await api.post<McqQuestionResponse>('/mcq-ai/generate', {
+    topic,
   });
   return response.data;
 }

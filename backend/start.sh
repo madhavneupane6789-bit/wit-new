@@ -13,9 +13,9 @@ if [ -z "$DATABASE_URL" ]; then
   echo "DATABASE_URL not set, using default for compose: $DATABASE_URL"
 fi
 
-echo "Waiting for database to be ready..."
-until npx prisma migrate deploy; do
-  echo "Database not ready, retrying in 3 seconds..."
+echo "Pushing database schema..."
+until npx prisma db push --accept-data-loss; do
+  echo "Database push failed, retrying in 3 seconds..."
   sleep 3
 done
 

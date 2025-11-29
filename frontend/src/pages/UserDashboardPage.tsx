@@ -13,7 +13,6 @@ import {
   uploadAvatar,
   markOpened,
 } from '../services/contentApi';
-import { changePassword } from '../services/authApi';
 import { useAuth } from '../hooks/useAuth';
 import { Link } from 'react-router-dom';
 import { Library } from '../components/User/Library';
@@ -40,12 +39,9 @@ const UserDashboardPage: React.FC = () => {
   const [announcement, setAnnouncement] = useState<string | null>(null);
   const [progress, setProgressValue] = useState<number>(0);
   const [now, setNow] = useState<string>(new Date().toLocaleString());
-  const [pwdOld, setPwdOld] = useState('');
-  const [pwdNew, setPwdNew] = useState('');
   const [uploading, setUploading] = useState(false);
   const [activeTab, setActiveTab] = useState<'library' | 'bookmarks' | 'read' | 'syllabus'>('library');
   const [playerFile, setPlayerFile] = useState<{ id: string; name: string; src: string } | null>(null);
-  const [requestMessage, setRequestMessage] = useState('');
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -63,29 +59,11 @@ const UserDashboardPage: React.FC = () => {
     }
   }, []);
 
-  const handleChangePassword = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      await changePassword({ oldPassword: pwdOld, newPassword: pwdNew });
-      setPwdOld('');
-      setPwdNew('');
-      alert('Password changed');
-    } catch (err: any) {
-      setError(err.message || 'Password change failed');
-    }
-  };
-
   useEffect(() => {
     load();
     const t = setInterval(() => setNow(new Date().toLocaleString()), 1000);
     return () => clearInterval(t);
   }, [load]);
-
-  const viewSyllabus = (sectionId: string) => {
-    // This function will be passed to the Library component
-    // For now, it will just switch the tab
-    setActiveTab('syllabus');
-  };
 
   const allFiles = useMemo(() => {
     const flat: FileItem[] = [...rootFiles];
@@ -155,11 +133,11 @@ const UserDashboardPage: React.FC = () => {
       setUploading(false);
     }
   };
-  
+
   const renderView = () => {
     switch (activeTab) {
       case 'library':
-        return <Library viewSyllabus={viewSyllabus} setPlayerFile={setPlayerFile} />;
+        return <Library viewSyllabus={() => setActiveTab('syllabus')} setPlayerFile={setPlayerFile} />;
       case 'bookmarks':
         return <Bookmarks bookmarks={bookmarks} toggleBookmark={toggleBookmark} toggleCompleted={toggleCompleted} handleOpen={handleOpen} />;
       case 'read':
@@ -167,7 +145,7 @@ const UserDashboardPage: React.FC = () => {
       case 'syllabus':
         return <Syllabus />;
       default:
-        return <Library viewSyllabus={viewSyllabus} setPlayerFile={setPlayerFile} />;
+        return <Library viewSyllabus={() => setActiveTab('syllabus')} setPlayerFile={setPlayerFile} />;
     }
   }
 
@@ -195,7 +173,7 @@ const UserDashboardPage: React.FC = () => {
         <div className="ml-auto text-sm text-slate-400">Local time: {now}</div>
       </div>
 
-      <div className="mb-6 grid gap-6 md:grid-cols-3">
+      <div className="mb-6 grid gap-6 md:grid-cols-2">
         <Card>
           <p className="text-xs uppercase tracking-[0.22em] text-secondary">Welcome</p>
           <h3 className="mt-2 text-xl font-semibold text-white">Hello, {user?.name}</h3>
@@ -212,32 +190,6 @@ const UserDashboardPage: React.FC = () => {
               <div className="h-full rounded-full bg-gradient-to-r from-primary to-secondary" style={{ width: `${overallProgress}%` }} />
             </div>
             <p className="mt-1 text-xs text-slate-400">{overallProgress}% completed</p>
-          </div>
-        </Card>
-        <Card>
-          <p className="text-xs uppercase tracking-[0.22em] text-secondary">Feedback</p>
-          <h3 className="mt-2 text-xl font-semibold text-white">Message admin</h3>
-          <p className="text-sm text-slate-300">
-            Share issues or requests with the admin team. Keep your account details handy for quick follow-up.
-          </p>
-          <div className="mt-3 space-y-2 rounded-xl bg-black/20 p-3">
-            <textarea
-              className="glass w-full rounded-lg border-transparent bg-black/20 px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-primary"
-              placeholder="Type your message..."
-              value={requestMessage}
-              onChange={(e) => setRequestMessage(e.target.value)}
-              rows={3}
-            />
-            <Button
-              variant="primary"
-              onClick={() => {
-                if (!requestMessage.trim()) return;
-                alert('Request sent to admin.');
-                setRequestMessage('');
-              }}
-            >
-              Send request
-            </Button>
           </div>
         </Card>
         <Card>
@@ -267,37 +219,9 @@ const UserDashboardPage: React.FC = () => {
           <p className="text-sm text-amber-400">Your account is awaiting approval from an administrator. All content is temporarily locked.</p>
         </Card>
       )}
-      {user?.status !== 'PENDING' ? (
-        <>
-          {renderView()}
 
-          <div className="mt-6 grid gap-6 md:grid-cols-2">
-            <Card>
-              <p className="text-xs uppercase tracking-[0.22em] text-secondary">Change Password</p>
-              <form className="mt-3 space-y-3" onSubmit={handleChangePassword}>
-                <input
-                  className="glass w-full rounded-xl border-transparent bg-black/20 px-3 py-2 text-white shadow-inner focus:border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary"
-                  placeholder="Old password"
-                  type="password"
-                  value={pwdOld}
-                  onChange={(e) => setPwdOld(e.target.value)}
-                  required
-                />
-                <input
-                  className="glass w-full rounded-xl border-transparent bg-black/20 px-3 py-2 text-white shadow-inner focus:border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary"
-                  placeholder="New password"
-                  type="password"
-                  value={pwdNew}
-                  onChange={(e) => setPwdNew(e.target.value)}
-                  required
-                />
-                <Button type="submit" disabled={!pwdOld || !pwdNew}>
-                  Update password
-                </Button>
-              </form>
-            </Card>
-          </div>
-        </>
+      {user?.status !== 'PENDING' ? (
+        renderView()
       ) : (
         <Card className="mb-6 border-slate-500/50 bg-slate-500/10 text-center">
           <p className="text-sm font-semibold text-slate-300">Content and features are unavailable until your account is activated.</p>

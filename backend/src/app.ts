@@ -15,7 +15,7 @@ import userStatsRoutes from './users/user.stats.routes';
 import uploadRoutes from './misc/upload.routes';
 import syllabusRoutes from './syllabus/syllabus.routes';
 import mcqRoutes from './mcq/mcq.routes';
-import { mcqAiRoutes } from './mcq-ai/mcq-ai.routes';
+import mcqAiRoutes from './mcq-ai/mcq-ai.routes';
 import mediaRoutes from './misc/media.routes';
 import { env } from './config/env';
 import { errorHandler } from './middleware/errorHandler';
