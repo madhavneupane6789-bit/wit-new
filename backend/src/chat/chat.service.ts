@@ -1,13 +1,14 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
+const chatApiKey = process.env.CHAT_GEMINI_API_KEY || process.env.GEMINI_API_KEY || '';
+const genAI = new GoogleGenerativeAI(chatApiKey);
 const MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
 
 export type ChatMessage = { role: 'user' | 'assistant'; content: string };
 
 export async function chatWithAi(message: string, history: ChatMessage[] = []) {
-  if (!process.env.GEMINI_API_KEY) {
-    throw new Error('GEMINI_API_KEY is missing');
+  if (!chatApiKey) {
+    throw new Error('CHAT_GEMINI_API_KEY is missing');
   }
 
   const systemPrompt =
