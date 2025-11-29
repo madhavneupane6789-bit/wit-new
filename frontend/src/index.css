@@ -129,3 +129,34 @@ body::after {
     inset 0 1px 0 rgba(255, 255, 255, 0.16),
     0 22px 70px var(--glass-glow);
 }
+
+/* Mobile-friendly typography tweaks */
+@media (max-width: 640px) {
+  :root {
+    font-size: 15px;
+  }
+
+  h1, .text-5xl, .text-4xl {
+    font-size: 1.75rem;
+    line-height: 1.2;
+  }
+
+  h2, .text-3xl {
+    font-size: 1.45rem;
+    line-height: 1.25;
+  }
+
+  h3, .text-2xl {
+    font-size: 1.25rem;
+    line-height: 1.3;
+  }
+
+  p, .text-base {
+    font-size: 0.95rem;
+    line-height: 1.55;
+  }
+
+  .glass, .glass-3d, button, input, textarea, select {
+    font-size: 0.95rem;
+  }
+}
