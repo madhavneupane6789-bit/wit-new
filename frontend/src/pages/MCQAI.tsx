@@ -147,8 +147,8 @@ export default function MCQAI() {
               <Spinner />
             </div>
           ) : !queue.length ? (
-            <div className="flex h-full min-h-[260px] items-center justify-center text-slate-400 text-sm">
-              Ask for a topic to see the generated question here.
+            <div className="flex h-full min-h-[260px] flex-col items-center justify-center text-slate-400 text-sm">
+              {error ? <p className="text-rose-400">{error}</p> : 'Ask for a topic to see the generated question here.'}
             </div>
           ) : (
             <div className="space-y-5">
