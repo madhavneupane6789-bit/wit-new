@@ -16,6 +16,7 @@ import uploadRoutes from './misc/upload.routes';
 import syllabusRoutes from './syllabus/syllabus.routes';
 import mcqRoutes from './mcq/mcq.routes';
 import mcqAiRoutes from './mcq-ai/mcq-ai.routes';
+import chatRoutes from './chat/chat.routes';
 import mediaRoutes from './misc/media.routes';
 import { env } from './config/env';
 import { errorHandler } from './middleware/errorHandler';
@@ -76,6 +77,7 @@ app.use('/api', syllabusRoutes);
 app.use('/api', mcqRoutes);
 app.use('/api/mcq-ai', mcqAiRoutes); // Add new route
 app.use('/mcq-ai', mcqAiRoutes); // fallback without /api prefix
+app.use('/api', chatRoutes);
 app.use('/api', mediaRoutes);
 
 app.use(errorHandler);

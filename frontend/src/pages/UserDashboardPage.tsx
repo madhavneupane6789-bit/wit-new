@@ -205,6 +205,9 @@ const UserDashboardPage: React.FC = () => {
         <Link to="/mcq-ai">
           <Button variant="ghost">AI MCQ</Button>
         </Link>
+        <Link to="/chat">
+          <Button variant="ghost">Chat with AI</Button>
+        </Link>
         <div className="ml-auto hidden text-sm text-slate-400 md:block">Local time: {now}</div>
       </div>
 

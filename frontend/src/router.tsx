@@ -11,6 +11,7 @@ import SyllabusPage from './pages/SyllabusPage';
 import SyllabusFullPage from './pages/SyllabusFullPage';
 import MCQPracticePage from './pages/MCQPracticePage';
 import MCQAI from './pages/MCQAI';
+import ChatPage from './pages/ChatPage';
 // import AccountPendingPage from './pages/AccountPendingPage'; // No longer directly redirected here
 import { useAuth } from './hooks/useAuth';
 import { LoadingScreen } from './components/UI/LoadingScreen';
@@ -104,6 +105,14 @@ const AppRouter: React.FC = () => (
         element={
           <RequireAuth>
             <MCQAI />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/chat"
+        element={
+          <RequireAuth>
+            <ChatPage />
           </RequireAuth>
         }
       />
