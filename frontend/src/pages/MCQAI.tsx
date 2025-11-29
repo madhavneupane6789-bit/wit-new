@@ -77,7 +77,8 @@ export default function MCQAI() {
     setShowAnswer(false);
     setSaveMessage(null);
     updateQueue((prev) => prev.slice(1));
-    fillQueue(false);
+    // Top up in the background to keep 3 in the queue
+    void fillQueue(false);
   };
 
   return (
@@ -225,7 +226,7 @@ export default function MCQAI() {
                 <Button variant="ghost" onClick={() => { setSelectedOption(null); setShowAnswer(false); }}>
                   Reset choices
                 </Button>
-                <Button onClick={fetchNext} disabled={!topic || isPrefetching}>
+                <Button onClick={fetchNext} disabled={!topic}>
                   Next question
                 </Button>
               </div>
