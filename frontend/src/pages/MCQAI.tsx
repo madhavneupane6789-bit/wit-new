@@ -11,8 +11,9 @@ export default function MCQAI() {
   const [topic, setTopic] = useState('');
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [showAnswer, setShowAnswer] = useState(false);
+  const [model, setModel] = useState<'gemini' | 'deepseek'>('gemini');
 
-  const { mutate, data: mcq, isLoading, isError, error, reset } = useMutation<McqQuestionResponse, Error, string>({
+  const { mutate, data: mcq, isLoading, isError, error, reset } = useMutation<McqQuestionResponse, Error, { topic: string; model: 'gemini' | 'deepseek' }>({
     mutationFn: generateMcqQuestion,
   });
 
@@ -22,13 +23,21 @@ export default function MCQAI() {
       reset(); // Reset previous state
       setSelectedOption(null);
       setShowAnswer(false);
-      mutate(topic);
+      mutate({ topic, model });
     }
   };
 
   const handleOptionSelect = (option: string) => {
     setSelectedOption(option);
     setShowAnswer(true);
+  };
+
+  const fetchNext = () => {
+    if (!topic.trim()) return;
+    setSelectedOption(null);
+    setShowAnswer(false);
+    reset();
+    mutate({ topic, model });
   };
 
   return (
@@ -60,6 +69,28 @@ export default function MCQAI() {
               className="glass w-full rounded-xl border-transparent bg-black/30 px-4 py-3 text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary"
               disabled={isLoading}
             />
+            <div className="grid grid-cols-2 gap-2">
+              <label className={`flex items-center gap-2 rounded-xl px-3 py-2 text-sm ${model === 'gemini' ? 'glass' : 'bg-black/20'}`}>
+                <input
+                  type="radio"
+                  name="model"
+                  value="gemini"
+                  checked={model === 'gemini'}
+                  onChange={() => setModel('gemini')}
+                />
+                Gemini (free)
+              </label>
+              <label className={`flex items-center gap-2 rounded-xl px-3 py-2 text-sm ${model === 'deepseek' ? 'glass' : 'bg-black/20'}`}>
+                <input
+                  type="radio"
+                  name="model"
+                  value="deepseek"
+                  checked={model === 'deepseek'}
+                  onChange={() => setModel('deepseek')}
+                />
+                DeepSeek
+              </label>
+            </div>
             <Button type="submit" disabled={isLoading} className="w-full">
               {isLoading ? <Spinner /> : 'Generate MCQ'}
             </Button>
@@ -125,6 +156,14 @@ export default function MCQAI() {
                   </p>
                 </div>
               )}
+              <div className="flex justify-end gap-2">
+                <Button variant="ghost" onClick={() => { setSelectedOption(null); setShowAnswer(false); }}>
+                  Reset choices
+                </Button>
+                <Button onClick={fetchNext} disabled={!topic || isLoading}>
+                  Next question
+                </Button>
+              </div>
             </div>
           )}
         </Card>

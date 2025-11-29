@@ -1,14 +1,12 @@
+import axios from "axios";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 // Default to the lighter/free tier model; allow override via env.
-const MODEL = process.env.GEMINI_MODEL || "gemini-1.5-flash";
+const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-1.5-flash";
+const DEEPSEEK_MODEL = process.env.DEEPSEEK_MODEL || "deepseek-chat";
 
-export const generateMcq = async (topic: string) => {
-  try {
-    const model = genAI.getGenerativeModel({ model: MODEL });
-
-    const prompt = `Generate one multiple-choice question about "${topic}" suitable for a civil service exam in Nepal.
+const promptFor = (topic: string) => `Generate one multiple-choice question about "${topic}" suitable for a civil service exam in Nepal.
 Return strict JSON with this shape:
 {
   "question": "string",
@@ -17,12 +15,51 @@ Return strict JSON with this shape:
   "explanation": "string"
 }`;
 
-    const result = await model.generateContent(prompt);
-    const text = (await result.response.text()).trim();
+function parseJsonResponse(text: string) {
+  const cleaned = text.trim().replace(/^```(?:json)?\s*/i, "").replace(/```$/, "");
+  return JSON.parse(cleaned);
+}
 
-    // Gemini may wrap JSON in code fences; strip them if present.
-    const cleaned = text.replace(/^```(?:json)?\s*/i, "").replace(/```$/, "");
-    return JSON.parse(cleaned);
+async function generateWithGemini(topic: string) {
+  const model = genAI.getGenerativeModel({ model: GEMINI_MODEL });
+  const result = await model.generateContent(promptFor(topic));
+  const text = (await result.response.text()).trim();
+  return parseJsonResponse(text);
+}
+
+async function generateWithDeepseek(topic: string) {
+  if (!process.env.DEEPSEEK_API_KEY) {
+    throw new Error("DEEPSEEK_API_KEY is missing");
+  }
+
+  const response = await axios.post(
+    "https://api.deepseek.com/v1/chat/completions",
+    {
+      model: DEEPSEEK_MODEL,
+      messages: [{ role: "user", content: promptFor(topic) }],
+      temperature: 0.7,
+    },
+    {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.DEEPSEEK_API_KEY}`,
+      },
+    }
+  );
+
+  const content = response.data?.choices?.[0]?.message?.content;
+  if (!content) {
+    throw new Error("No content returned from Deepseek");
+  }
+  return parseJsonResponse(content);
+}
+
+export const generateMcq = async (topic: string, provider: "gemini" | "deepseek" = "gemini") => {
+  try {
+    if (provider === "deepseek") {
+      return await generateWithDeepseek(topic);
+    }
+    return await generateWithGemini(topic);
   } catch (error) {
     console.error("Error generating MCQ:", error);
     throw new Error("Failed to generate MCQ from AI service.");

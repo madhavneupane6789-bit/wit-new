@@ -12,9 +12,7 @@ export type McqQuestionResponse = {
   explanation: string;
 };
 
-export async function generateMcqQuestion(topic: string): Promise<McqQuestionResponse> {
-  const response = await api.post<McqQuestionResponse>('/mcq-ai/generate', {
-    topic,
-  });
+export async function generateMcqQuestion(params: { topic: string; model: 'gemini' | 'deepseek' }): Promise<McqQuestionResponse> {
+  const response = await api.post<McqQuestionResponse>('/mcq-ai/generate', params);
   return response.data;
 }
