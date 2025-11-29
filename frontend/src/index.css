@@ -160,3 +160,30 @@ body::after {
     font-size: 0.9rem;
   }
 }
+
+/* Extra small phones */
+@media (max-width: 480px) {
+  :root {
+    font-size: 13px;
+  }
+
+  h1, .text-5xl, .text-4xl {
+    font-size: 1.4rem;
+  }
+
+  h2, .text-3xl {
+    font-size: 1.2rem;
+  }
+
+  h3, .text-2xl {
+    font-size: 1.05rem;
+  }
+
+  p, .text-base, .text-sm {
+    font-size: 0.88rem;
+  }
+
+  .glass, .glass-3d, button, input, textarea, select {
+    font-size: 0.88rem;
+  }
+}
