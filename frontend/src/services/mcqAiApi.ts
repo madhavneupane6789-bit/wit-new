@@ -13,6 +13,6 @@ export type McqQuestionResponse = {
 };
 
 export async function generateMcqQuestion(params: { topic: string; model: 'gemini' | 'deepseek' }): Promise<McqQuestionResponse> {
-  const response = await api.post<McqQuestionResponse>('/mcq-ai/generate', params);
+  const response = await api.post<McqQuestionResponse>('/api/mcq-ai/generate', params);
   return response.data;
 }
