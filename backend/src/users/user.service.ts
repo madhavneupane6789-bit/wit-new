@@ -143,8 +143,12 @@ export async function deleteUser(id: string) {
   }
 
   await prisma.$transaction([
+    // Clean up dependent records first to avoid FK violations
+    prisma.passwordResetToken.deleteMany({ where: { userId: id } }),
     prisma.bookmark.deleteMany({ where: { userId: id } }),
     prisma.fileProgress.deleteMany({ where: { userId: id } }),
+    prisma.file.updateMany({ where: { ownerId: id }, data: { ownerId: null } }),
+    prisma.folder.updateMany({ where: { createdById: id }, data: { createdById: null } }),
     prisma.user.delete({ where: { id } }),
   ]);
 
