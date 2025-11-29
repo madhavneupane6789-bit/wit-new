@@ -151,7 +151,7 @@ const UserDashboardPage: React.FC = () => {
 
   return (
     <DashboardLayout title="Dashboard">
-      <div className="mb-4 flex flex-wrap items-center gap-2">
+      <div className="mb-4 flex items-center gap-2 overflow-x-auto pb-2 md:flex-wrap md:overflow-visible">
         <Button variant={activeTab === 'library' ? 'primary' : 'ghost'} onClick={() => setActiveTab('library')}>
           Library
         </Button>
@@ -170,7 +170,7 @@ const UserDashboardPage: React.FC = () => {
         <Link to="/mcq-ai">
           <Button variant="ghost">AI MCQ</Button>
         </Link>
-        <div className="ml-auto text-sm text-slate-400">Local time: {now}</div>
+        <div className="ml-auto hidden text-sm text-slate-400 md:block">Local time: {now}</div>
       </div>
 
       <div className="mb-6 grid gap-6 md:grid-cols-2">
@@ -244,7 +244,7 @@ const UserDashboardPage: React.FC = () => {
               <iframe
                 key={playerFile.src}
                 src={playerFile.src}
-                className="h-[480px] w-full"
+                className="h-[320px] w-full md:h-[480px]"
                 allow="autoplay; encrypted-media"
                 allowFullScreen
                 title="Drive video player"
