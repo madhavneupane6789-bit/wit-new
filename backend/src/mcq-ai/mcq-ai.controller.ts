@@ -7,7 +7,7 @@ export const generateMcqHandler = async (
   next: NextFunction
 ) => {
   try {
-    const { topic } = req.body;
+    const topic = (req.body?.topic as string | undefined) || (req.query?.topic as string | undefined);
     if (!topic) {
       return res.status(400).json({ message: "Topic is required" });
     }

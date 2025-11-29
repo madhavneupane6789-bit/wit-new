@@ -75,6 +75,7 @@ app.use('/api', uploadRoutes);
 app.use('/api', syllabusRoutes);
 app.use('/api', mcqRoutes);
 app.use('/api/mcq-ai', mcqAiRoutes); // Add new route
+app.use('/mcq-ai', mcqAiRoutes); // fallback without /api prefix
 app.use('/api', mediaRoutes);
 
 app.use(errorHandler);
