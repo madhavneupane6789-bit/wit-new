@@ -18,6 +18,7 @@ export default function MCQAI() {
   const queueRef = useRef<McqQuestionResponse[]>([]);
   const [isPrefetching, setIsPrefetching] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const isLoading = isPrefetching;
 
   const saveMutation = useMutation({
     mutationFn: suggestMcq,
@@ -133,11 +134,7 @@ export default function MCQAI() {
             <Button type="submit" disabled={isLoading} className="w-full">
               {isLoading ? <Spinner /> : 'Generate MCQ'}
             </Button>
-            {isError && (
-              <p className="text-sm text-rose-400">
-                {error?.message || 'Failed to generate MCQ.'}
-              </p>
-            )}
+            {error && <p className="text-sm text-rose-400">{error}</p>}
           </form>
         </Card>
 
