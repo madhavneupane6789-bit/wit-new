@@ -19,6 +19,8 @@ function toPublicUser(
       email: true;
       role: true;
       status: true;
+      isApproved: true;
+      isActive: true;
       subscriptionStartDate: true;
       subscriptionEndDate: true;
       subscriptionStatus: true;
@@ -66,7 +68,20 @@ export async function registerUser(params: {
       preparingFor: params.preparingFor,
       avatarUrl: params.avatarUrl,
     },
-    select: { id: true, name: true, email: true, role: true, status: true, subscriptionStartDate: true, subscriptionEndDate: true, subscriptionStatus: true, lastLoginDate: true, avatarUrl: true },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      status: true,
+      isApproved: true,
+      isActive: true,
+      subscriptionStartDate: true,
+      subscriptionEndDate: true,
+      subscriptionStatus: true,
+      lastLoginDate: true,
+      avatarUrl: true,
+    },
   });
 
   const tokens = issueTokens(user);
@@ -83,6 +98,8 @@ export async function loginUser(params: { email: string; password: string }) {
       role: true,
       passwordHash: true,
       status: true,
+      isApproved: true,
+      isActive: true,
       subscriptionStartDate: true,
       subscriptionEndDate: true,
       subscriptionStatus: true,
@@ -113,6 +130,8 @@ export async function loginUser(params: { email: string; password: string }) {
       email: user.email,
       role: user.role,
       status: user.status,
+      isApproved: user.isApproved,
+      isActive: user.isActive,
       subscriptionStartDate: user.subscriptionStartDate,
       subscriptionEndDate: user.subscriptionEndDate,
       subscriptionStatus: user.subscriptionStatus,
@@ -142,6 +161,8 @@ export async function refreshSession(refreshToken: string | undefined) {
       email: true,
       role: true,
       status: true,
+      isApproved: true,
+      isActive: true,
       subscriptionStartDate: true,
       subscriptionEndDate: true,
       subscriptionStatus: true,
@@ -166,6 +187,8 @@ export async function getCurrentUser(userId: string) {
       email: true,
       role: true,
       status: true,
+      isApproved: true,
+      isActive: true,
       subscriptionStartDate: true,
       subscriptionEndDate: true,
       subscriptionStatus: true,
