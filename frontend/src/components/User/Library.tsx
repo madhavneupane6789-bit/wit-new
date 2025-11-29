@@ -123,7 +123,7 @@ export const Library: React.FC<LibraryProps> = ({ viewSyllabus, setPlayerFile })
 
   return (
     <div className="grid gap-6 lg:grid-cols-[320px,1fr]">
-      <Card>
+      <Card className="hidden lg:block">
         <div className="mb-3 flex items-center justify-between">
           <h3 className="text-lg font-semibold text-white">Content Tree</h3>
         </div>
