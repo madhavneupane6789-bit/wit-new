@@ -35,6 +35,9 @@ const LandingPage: React.FC = () => {
               <Link to="/register">
                 <Button variant="ghost">Create account</Button>
               </Link>
+              <Link to="/mcq-ai">
+                <Button variant="ghost">Try AI MCQ</Button>
+              </Link>
             </div>
           </motion.div>
           <div className="grid gap-6 md:grid-cols-3">
