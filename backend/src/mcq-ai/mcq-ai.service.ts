@@ -2,8 +2,8 @@ import axios from "axios";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
-// Default to the lighter/free tier model; allow override via env.
-const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-1.5-flash";
+// Default to a currently listed model; allow override via env.
+const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-2.5-flash";
 const DEEPSEEK_MODEL = process.env.DEEPSEEK_MODEL || "deepseek-chat";
 
 const promptFor = (topic: string) => `Generate one multiple-choice question about "${topic}" suitable for a civil service exam in Nepal.
