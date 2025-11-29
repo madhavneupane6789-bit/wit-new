@@ -70,6 +70,8 @@ export const Library: React.FC<LibraryProps> = ({ viewSyllabus, setPlayerFile })
   const currentFolder = useMemo(() => findFolder(tree, selectedFolder), [tree, selectedFolder]);
   const filesToShow = selectedFolder ? currentFolder?.files || [] : rootFiles;
   const folderChildren = selectedFolder ? currentFolder?.children || [] : tree;
+  const subfolderScrollable = folderChildren.length > 4;
+  const filesScrollable = (filesToShow?.length || 0) > 4;
   const updateFileLocally = (fileId: string, updater: (f: FileItem) => Partial<FileItem>) => {
     let nextRoots: FileItem[] = [];
     setRootFiles((prev) => {
@@ -139,14 +141,16 @@ export const Library: React.FC<LibraryProps> = ({ viewSyllabus, setPlayerFile })
   };
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[320px,1fr]">
+    <div className="grid gap-4 lg:grid-cols-[320px,1fr]">
       <Card className="hidden lg:block">
         <div className="mb-3 flex items-center justify-between">
           <h3 className="text-lg font-semibold text-white">Content Tree</h3>
         </div>
-        {loading ? <Spinner /> : <TreeView tree={tree} selectedId={selectedFolder} onSelect={(id) => setSelectedFolder(id)} />}
+        <div className="max-h-[70vh] overflow-auto pr-2">
+          {loading ? <Spinner /> : <TreeView tree={tree} selectedId={selectedFolder} onSelect={(id) => setSelectedFolder(id)} />}
+        </div>
       </Card>
-      <Card>
+      <Card className="min-h-[60vh]">
         <div className="mb-4 flex items-center justify-between">
           <div>
             <p className="text-xs uppercase tracking-[0.22em] text-secondary">Files</p>
@@ -158,7 +162,12 @@ export const Library: React.FC<LibraryProps> = ({ viewSyllabus, setPlayerFile })
           <Spinner />
         ) : (
           <div className="space-y-6">
-            <div>
+            <div className="relative max-h-[40vh] overflow-auto pr-2">
+              {subfolderScrollable && (
+                <div className="pointer-events-none absolute right-2 top-1 text-[11px] uppercase tracking-[0.12em] text-slate-400">
+                  Scroll ↓
+                </div>
+              )}
               <p className="text-xs uppercase tracking-[0.22em] text-secondary">Sub-folders</p>
               <div className="mt-3 grid gap-4 sm:grid-cols-2">
                 {folderChildren.length === 0 && <p className="text-sm text-slate-400">No folders here.</p>}
@@ -177,7 +186,12 @@ export const Library: React.FC<LibraryProps> = ({ viewSyllabus, setPlayerFile })
                 ))}
               </div>
             </div>
-            <div>
+            <div className="relative max-h-[50vh] overflow-auto pr-2">
+              {filesScrollable && (
+                <div className="pointer-events-none absolute right-2 top-1 text-[11px] uppercase tracking-[0.12em] text-slate-400">
+                  Scroll ↓
+                </div>
+              )}
               <div className="flex items-center justify-between">
                 <p className="text-xs uppercase tracking-[0.22em] text-secondary">Files</p>
                 {selectedFolder && (
