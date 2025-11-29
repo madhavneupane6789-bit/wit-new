@@ -43,8 +43,8 @@ const UserDashboardPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'library' | 'bookmarks' | 'read' | 'syllabus'>('library');
   const [playerFile, setPlayerFile] = useState<{ id: string; name: string; src: string } | null>(null);
 
-  const load = useCallback(async () => {
-    setLoading(true);
+  const load = useCallback(async (showSpinner = true) => {
+    if (showSpinner) setLoading(true);
     setError(null);
     try {
       const [data, ann] = await Promise.all([fetchUserTree(), fetchAnnouncement()]);
@@ -55,7 +55,7 @@ const UserDashboardPage: React.FC = () => {
     } catch (err: any) {
       setError(err.message || 'Failed to load content');
     } finally {
-      setLoading(false);
+      if (showSpinner) setLoading(false);
     }
   }, []);
 
@@ -88,7 +88,7 @@ const UserDashboardPage: React.FC = () => {
       } else {
         await addBookmark(file.id);
       }
-      await load();
+      await load(false);
     } catch (err: any) {
       setError(err.message || 'Bookmark update failed');
     }
@@ -97,7 +97,7 @@ const UserDashboardPage: React.FC = () => {
   const toggleCompleted = async (file: FileItem) => {
     try {
       await setProgress(file.id, !file.completed);
-      await load();
+      await load(false);
     } catch (err: any) {
       setError(err.message || 'Progress update failed');
     }
@@ -125,7 +125,7 @@ const UserDashboardPage: React.FC = () => {
     setUploading(true);
     try {
       await uploadAvatar(file);
-      await load();
+      await load(false);
       alert('Avatar updated');
     } catch (err: any) {
       setError(err.message || 'Avatar upload failed');
