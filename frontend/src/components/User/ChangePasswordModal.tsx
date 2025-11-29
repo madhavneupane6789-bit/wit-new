@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import { Button } from './UI/Button';
-import { Card } from './UI/Card';
-import { Modal } from './UI/Modal';
-import { changePassword as changePasswordApi } from '../services/authApi';
+import { Button } from '../UI/Button';
+import { Modal } from '../UI/Modal';
+import { changePassword as changePasswordApi } from '../../services/authApi';
 
 type Props = {
   isOpen: boolean;
