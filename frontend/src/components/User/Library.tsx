@@ -164,7 +164,7 @@ export const Library: React.FC<LibraryProps> = ({ viewSyllabus, setPlayerFile })
           <div className="space-y-6">
             <div className="relative max-h-[40vh] overflow-auto pr-2">
               {subfolderScrollable && (
-                <div className="pointer-events-none absolute right-2 top-1 text-[11px] uppercase tracking-[0.12em] text-slate-400">
+                <div className="pointer-events-none absolute right-2 bottom-4 text-[11px] uppercase tracking-[0.12em] text-slate-400">
                   Scroll ↓
                 </div>
               )}
@@ -188,7 +188,7 @@ export const Library: React.FC<LibraryProps> = ({ viewSyllabus, setPlayerFile })
             </div>
             <div className="relative max-h-[50vh] overflow-auto pr-2">
               {filesScrollable && (
-                <div className="pointer-events-none absolute right-2 top-1 text-[11px] uppercase tracking-[0.12em] text-slate-400">
+                <div className="pointer-events-none absolute right-2 bottom-4 text-[11px] uppercase tracking-[0.12em] text-slate-400">
                   Scroll ↓
                 </div>
               )}
