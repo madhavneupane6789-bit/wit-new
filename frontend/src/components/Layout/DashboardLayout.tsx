@@ -55,6 +55,7 @@ export const DashboardLayout: React.FC<Props> = ({ title, children }) => {
           <div className="flex items-center gap-4">
             <div className="relative" ref={menuRef}>
               <button
+                type="button"
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
                 className="flex items-center gap-4 text-right cursor-pointer"
               >
@@ -66,7 +67,7 @@ export const DashboardLayout: React.FC<Props> = ({ title, children }) => {
               </button>
 
               {isMenuOpen && (
-                <div className="absolute right-0 mt-2 w-72 origin-top-right rounded-xl glass-dark shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                <div className="absolute right-0 mt-2 w-72 origin-top-right rounded-xl glass bg-black/70 shadow-lg ring-1 ring-black/30 focus:outline-none z-50">
                   <div className="py-1 px-1">
                     <div className="px-3 py-2">
                       <p className="text-xs uppercase tracking-wider text-slate-400">Account Status</p>
