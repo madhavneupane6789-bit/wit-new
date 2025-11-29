@@ -32,26 +32,32 @@ async function generateWithDeepseek(topic: string) {
     throw new Error("DEEPSEEK_API_KEY is missing");
   }
 
-  const response = await axios.post(
-    "https://api.deepseek.com/v1/chat/completions",
-    {
-      model: DEEPSEEK_MODEL,
-      messages: [{ role: "user", content: promptFor(topic) }],
-      temperature: 0.7,
-    },
-    {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.DEEPSEEK_API_KEY}`,
+  try {
+    const response = await axios.post(
+      "https://api.deepseek.com/v1/chat/completions",
+      {
+        model: DEEPSEEK_MODEL,
+        messages: [{ role: "user", content: promptFor(topic) }],
+        temperature: 0.7,
       },
-    }
-  );
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${process.env.DEEPSEEK_API_KEY}`,
+        },
+      }
+    );
 
-  const content = response.data?.choices?.[0]?.message?.content;
-  if (!content) {
-    throw new Error("No content returned from Deepseek");
+    const content = response.data?.choices?.[0]?.message?.content;
+    if (!content) {
+      throw new Error("No content returned from Deepseek");
+    }
+    return parseJsonResponse(content);
+  } catch (err: any) {
+    const status = err?.response?.status;
+    const msg = err?.response?.data?.error?.message || err?.message || "Deepseek request failed";
+    throw new Error(`Deepseek error (${status || "unknown"}): ${msg}`);
   }
-  return parseJsonResponse(content);
 }
 
 export const generateMcq = async (topic: string, provider: "gemini" | "deepseek" = "gemini") => {
@@ -62,6 +68,10 @@ export const generateMcq = async (topic: string, provider: "gemini" | "deepseek"
     return await generateWithGemini(topic);
   } catch (error) {
     console.error("Error generating MCQ:", error);
+    // Surface provider-specific message when available
+    if (error instanceof Error) {
+      throw error;
+    }
     throw new Error("Failed to generate MCQ from AI service.");
   }
 };
