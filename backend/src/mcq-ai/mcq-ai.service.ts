@@ -1,20 +1,27 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+const MODEL = "gemini-2.5-flash";
 
 export const generateMcq = async (topic: string) => {
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    const model = genAI.getGenerativeModel({ model: MODEL });
 
-    const prompt = `Generate a multiple-choice question about ${topic} for a civil service exam in Nepal. Provide four options (A, B, C, D), indicate the correct answer, and give a brief explanation. Format the output as a JSON object with keys: "question", "options" (an array of strings), "correctAnswer" (the letter 'A', 'B', 'C', or 'D'), and "explanation".`;
+    const prompt = `Generate one multiple-choice question about "${topic}" suitable for a civil service exam in Nepal.
+Return strict JSON with this shape:
+{
+  "question": "string",
+  "options": { "A": "string", "B": "string", "C": "string", "D": "string" },
+  "correctAnswer": "A"|"B"|"C"|"D",
+  "explanation": "string"
+}`;
 
     const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const text = await response.text();
+    const text = (await result.response.text()).trim();
 
-    // Attempt to parse the JSON from the response text
-    const jsonResponse = JSON.parse(text);
-    return jsonResponse;
+    // Gemini may wrap JSON in code fences; strip them if present.
+    const cleaned = text.replace(/^```(?:json)?\s*/i, "").replace(/```$/, "");
+    return JSON.parse(cleaned);
   } catch (error) {
     console.error("Error generating MCQ:", error);
     throw new Error("Failed to generate MCQ from AI service.");
