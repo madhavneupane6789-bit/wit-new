@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { generateMcqQuestion, McqQuestionResponse } from '../services/mcqAiApi';
 import { Button } from '../components/UI/Button';
@@ -14,10 +14,10 @@ export default function MCQAI() {
   const [showAnswer, setShowAnswer] = useState(false);
   const [model, setModel] = useState<'gemini' | 'deepseek'>('gemini');
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
-
-  const { mutate, data: mcq, isLoading, isError, error, reset } = useMutation<McqQuestionResponse, Error, { topic: string; model: 'gemini' | 'deepseek' }>({
-    mutationFn: generateMcqQuestion,
-  });
+  const [queue, setQueue] = useState<McqQuestionResponse[]>([]);
+  const queueRef = useRef<McqQuestionResponse[]>([]);
+  const [isPrefetching, setIsPrefetching] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const saveMutation = useMutation({
     mutationFn: suggestMcq,
@@ -29,14 +29,40 @@ export default function MCQAI() {
     },
   });
 
+  const updateQueue = (updater: (prev: McqQuestionResponse[]) => McqQuestionResponse[]) => {
+    setQueue((prev) => {
+      const next = updater(prev);
+      queueRef.current = next;
+      return next;
+    });
+  };
+
+  const fillQueue = async (resetQueue = false) => {
+    if (!topic.trim()) return;
+    if (resetQueue) {
+      updateQueue(() => []);
+    }
+    setIsPrefetching(true);
+    setError(null);
+    try {
+      while (queueRef.current.length < 3) {
+        const mcq = await generateMcqQuestion({ topic, model });
+        updateQueue((prev) => [...prev, mcq]);
+      }
+    } catch (err: any) {
+      setError(err.message || 'Failed to generate MCQ.');
+    } finally {
+      setIsPrefetching(false);
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (topic.trim()) {
-      reset(); // Reset previous state
-      setSelectedOption(null);
-      setShowAnswer(false);
-      mutate({ topic, model });
-    }
+    if (!topic.trim()) return;
+    setSaveMessage(null);
+    setSelectedOption(null);
+    setShowAnswer(false);
+    fillQueue(true);
   };
 
   const handleOptionSelect = (option: string) => {
@@ -48,8 +74,9 @@ export default function MCQAI() {
     if (!topic.trim()) return;
     setSelectedOption(null);
     setShowAnswer(false);
-    reset();
-    mutate({ topic, model });
+    setSaveMessage(null);
+    updateQueue((prev) => prev.slice(1));
+    fillQueue(false);
   };
 
   return (
@@ -115,83 +142,93 @@ export default function MCQAI() {
         </Card>
 
         <Card className="lg:col-span-2">
-          {!mcq ? (
+          {(!queue.length && isPrefetching) ? (
+            <div className="flex h-full min-h-[260px] items-center justify-center text-slate-400 text-sm">
+              <Spinner />
+            </div>
+          ) : !queue.length ? (
             <div className="flex h-full min-h-[260px] items-center justify-center text-slate-400 text-sm">
               Ask for a topic to see the generated question here.
             </div>
           ) : (
             <div className="space-y-5">
-              <div>
-                <p className="text-xs uppercase tracking-[0.22em] text-secondary">Question</p>
-                <h3 className="mt-2 text-2xl font-semibold text-white">{mcq.question}</h3>
-              </div>
+              {error && <p className="text-sm text-rose-400">{error}</p>}
+              {isPrefetching && <p className="text-xs text-slate-400">Preloading next questions...</p>}
+              {queue.length > 1 && <p className="text-xs text-slate-400">Up next: {queue.length - 1} question(s) ready.</p>}
+              {queue[0] && (
+                <>
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.22em] text-secondary">Question</p>
+                    <h3 className="mt-2 text-2xl font-semibold text-white">{queue[0].question}</h3>
+                  </div>
+                  <div className="space-y-3">
+                    {Object.entries(queue[0].options).map(([key, value]) => {
+                      const isSelected = selectedOption === key;
+                      const isCorrect = queue[0].correctAnswer === key;
+                      return (
+                        <button
+                          key={key}
+                          onClick={() => handleOptionSelect(key)}
+                          className={`glass flex w-full items-center justify-between rounded-2xl border px-4 py-3 text-left transition-all ${
+                            isSelected
+                              ? isCorrect
+                                ? 'border-emerald-500/50 bg-emerald-500/20 text-white'
+                                : 'border-rose-500/50 bg-rose-500/20 text-white'
+                              : 'border-transparent hover:bg-white/10'
+                          } ${isCorrect && showAnswer && !isSelected ? 'border-emerald-500/50 bg-emerald-500/20' : ''}`}
+                          disabled={showAnswer}
+                        >
+                          <span className="font-semibold text-white">
+                            {key}. {value}
+                          </span>
+                          {isSelected && <span className="text-xs">{isCorrect ? 'Correct' : 'Your choice'}</span>}
+                        </button>
+                      );
+                    })}
+                  </div>
 
-              <div className="space-y-3">
-                {Object.entries(mcq.options).map(([key, value]) => {
-                  const isSelected = selectedOption === key;
-                  const isCorrect = mcq.correctAnswer === key;
-                  return (
-                    <button
-                      key={key}
-                      onClick={() => handleOptionSelect(key)}
-                      className={`glass flex w-full items-center justify-between rounded-2xl border px-4 py-3 text-left transition-all ${
-                        isSelected
-                          ? isCorrect
-                            ? 'border-emerald-500/50 bg-emerald-500/20 text-white'
-                            : 'border-rose-500/50 bg-rose-500/20 text-white'
-                          : 'border-transparent hover:bg-white/10'
-                      } ${isCorrect && showAnswer && !isSelected ? 'border-emerald-500/50 bg-emerald-500/20' : ''}`}
-                      disabled={showAnswer}
-                    >
-                      <span className="font-semibold text-white">
-                        {key}. {value}
-                      </span>
-                      {isSelected && <span className="text-xs">{isCorrect ? 'Correct' : 'Your choice'}</span>}
-                    </button>
-                  );
-                })}
-              </div>
-
-              {showAnswer && (
-                <div className="rounded-xl bg-black/30 p-4 text-slate-100">
-                  <p className="text-sm">
-                    Your answer:{' '}
-                    <span className={selectedOption === mcq.correctAnswer ? 'text-emerald-400' : 'text-rose-400'}>
-                      {selectedOption === mcq.correctAnswer ? 'Correct' : 'Incorrect'}
-                    </span>
-                  </p>
-                  <p className="text-sm">
-                    Correct: <span className="text-emerald-400">{mcq.correctAnswer}</span>
-                  </p>
-                  <p className="mt-3 text-sm text-slate-200">
-                    {mcq.explanation}
-                  </p>
-                </div>
+                  {showAnswer && (
+                    <div className="rounded-xl bg-black/30 p-4 text-slate-100">
+                      <p className="text-sm">
+                        Your answer:{' '}
+                        <span className={selectedOption === queue[0].correctAnswer ? 'text-emerald-400' : 'text-rose-400'}>
+                          {selectedOption === queue[0].correctAnswer ? 'Correct' : 'Incorrect'}
+                        </span>
+                      </p>
+                      <p className="text-sm">
+                        Correct: <span className="text-emerald-400">{queue[0].correctAnswer}</span>
+                      </p>
+                      <p className="mt-3 text-sm text-slate-200">
+                        {queue[0].explanation}
+                      </p>
+                    </div>
+                  )}
+                </>
               )}
               <div className="flex justify-end gap-2">
                 <Button
                   variant="ghost"
                   onClick={() => {
-                    if (!mcq) return;
+                    if (!queue[0]) return;
                     setSaveMessage(null);
                     saveMutation.mutate({
-                      question: mcq.question,
-                      optionA: mcq.options.A,
-                      optionB: mcq.options.B,
-                      optionC: mcq.options.C,
-                      optionD: mcq.options.D,
-                      correctOption: mcq.correctAnswer,
-                      explanation: mcq.explanation,
+                      question: queue[0].question,
+                      optionA: queue[0].options.A,
+                      optionB: queue[0].options.B,
+                      optionC: queue[0].options.C,
+                      optionD: queue[0].options.D,
+                      correctOption: queue[0].correctAnswer,
+                      explanation: queue[0].explanation,
                     });
                   }}
-                  disabled={!mcq || saveMutation.isLoading}
+                  disabled={!queue[0] || saveMutation.isLoading}
                 >
                   {saveMutation.isLoading ? 'Sending...' : 'Save to question bank'}
                 </Button>
                 <Button variant="ghost" onClick={() => { setSelectedOption(null); setShowAnswer(false); }}>
                   Reset choices
                 </Button>
-                <Button onClick={fetchNext} disabled={!topic || isLoading}>
+                <Button onClick={fetchNext} disabled={!topic || isPrefetching}>
                   Next question
                 </Button>
               </div>
